@@ -1,0 +1,1243 @@
+{
+ "navi": {
+  "Abukama": {
+   "nome": "Abukama",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 20,
+   "silu": 2
+  },
+  "Ashigara": {
+   "nome": "Ashigara",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 3,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 1
+  },
+  "Astoria": {
+   "nome": "Astoria",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Atago": {
+   "nome": "Atago",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Atlanta": {
+   "nome": "Atlanta",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 2,
+   "aa": 3,
+   "mv": 2,
+   "danno": 4,
+   "mun": 15,
+   "silu": 0
+  },
+  "Australia": {
+   "nome": "Australia",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Chester": {
+   "nome": "Chester",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Chitose": {
+   "nome": "Chitose",
+   "tipo": "AV",
+   "lato": "J",
+   "art": 1,
+   "aa": 2,
+   "mv": 2,
+   "danno": 3,
+   "mun": 12,
+   "silu": 0
+  },
+  "Detroit": {
+   "nome": "Detroit",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 2,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 15,
+   "silu": 0
+  },
+  "Enterprise": {
+   "nome": "Enterprise",
+   "tipo": "CV",
+   "lato": "A",
+   "art": 1,
+   "aa": 7,
+   "mv": 2,
+   "danno": 7,
+   "mun": 12,
+   "silu": 0
+  },
+  "Fuso": {
+   "nome": "Fuso",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 15,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Helena": {
+   "nome": "Helena",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Hiei": {
+   "nome": "Hiei",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 12,
+   "aa": 3,
+   "mv": 2,
+   "danno": 10,
+   "mun": 24,
+   "silu": 0
+  },
+  "Hiryu": {
+   "nome": "Hiryu",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 4,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 0
+  },
+  "Hobart": {
+   "nome": "Hobart",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 3,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 15,
+   "silu": 0
+  },
+  "Honolulu": {
+   "nome": "Honolulu",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Ise": {
+   "nome": "Ise",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 15,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Juneau": {
+   "nome": "Juneau",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 2,
+   "aa": 3,
+   "mv": 2,
+   "danno": 4,
+   "mun": 15,
+   "silu": 0
+  },
+  "Junyo": {
+   "nome": "Junyo",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 4,
+   "mv": 1,
+   "danno": 5,
+   "mun": 12,
+   "silu": 0
+  },
+  "Kamikawa": {
+   "nome": "Kamikawa",
+   "tipo": "AV",
+   "lato": "J",
+   "art": 0,
+   "aa": 1,
+   "mv": 1,
+   "danno": 2,
+   "mun": 0,
+   "silu": 0
+  },
+  "Kirishima": {
+   "nome": "Kirishima",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 12,
+   "aa": 3,
+   "mv": 2,
+   "danno": 10,
+   "mun": 24,
+   "silu": 0
+  },
+  "Kongo": {
+   "nome": "Kongo",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 12,
+   "aa": 3,
+   "mv": 2,
+   "danno": 10,
+   "mun": 24,
+   "silu": 0
+  },
+  "Mikuma": {
+   "nome": "Mikuma",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Minneapolis": {
+   "nome": "Minneapolis",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Mississippi": {
+   "nome": "Mississippi",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 20,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Musashi": {
+   "nome": "Musashi",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 28,
+   "aa": 4,
+   "mv": 2,
+   "danno": 18,
+   "mun": 24,
+   "silu": 0
+  },
+  "Mutsu": {
+   "nome": "Mutsu",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 18,
+   "aa": 3,
+   "mv": 1,
+   "danno": 12,
+   "mun": 24,
+   "silu": 0
+  },
+  "New Orleans": {
+   "nome": "New Orleans",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Northampton": {
+   "nome": "Northampton",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Oi": {
+   "nome": "Oi",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 3,
+   "mun": 20,
+   "silu": 2
+  },
+  "Oklahoma": {
+   "nome": "Oklahoma",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 18,
+   "aa": 3,
+   "mv": 1,
+   "danno": 10,
+   "mun": 24,
+   "silu": 0
+  },
+  "Pensacola": {
+   "nome": "Pensacola",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Quincy": {
+   "nome": "Quincy",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "San Diego": {
+   "nome": "San Diego",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 2,
+   "aa": 3,
+   "mv": 2,
+   "danno": 4,
+   "mun": 15,
+   "silu": 0
+  },
+  "San Francisco": {
+   "nome": "San Francisco",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "San Juan": {
+   "nome": "San Juan",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 2,
+   "aa": 3,
+   "mv": 2,
+   "danno": 4,
+   "mun": 15,
+   "silu": 0
+  },
+  "Saratoga": {
+   "nome": "Saratoga",
+   "tipo": "CV",
+   "lato": "A",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 8,
+   "mun": 12,
+   "silu": 0
+  },
+  "Shokaku": {
+   "nome": "Shokaku",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 0
+  },
+  "South Dakota": {
+   "nome": "South Dakota",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 25,
+   "aa": 9,
+   "mv": 2,
+   "danno": 15,
+   "mun": 24,
+   "silu": 0
+  },
+  "Suzuya": {
+   "nome": "Suzuya",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Tama": {
+   "nome": "Tama",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 20,
+   "silu": 2
+  },
+  "Tatsuta": {
+   "nome": "Tatsuta",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 5,
+   "mun": 20,
+   "silu": 2
+  },
+  "Tennessee": {
+   "nome": "Tennessee",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 20,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Washington": {
+   "nome": "Washington",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 25,
+   "aa": 7,
+   "mv": 2,
+   "danno": 15,
+   "mun": 24,
+   "silu": 0
+  },
+  "West Virginia": {
+   "nome": "West Virginia",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 22,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Yorktown": {
+   "nome": "Yorktown",
+   "tipo": "CV",
+   "lato": "A",
+   "art": 1,
+   "aa": 4,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 0
+  },
+  "Zuiho": {
+   "nome": "Zuiho",
+   "tipo": "CVL",
+   "lato": "J",
+   "art": 1,
+   "aa": 3,
+   "mv": 2,
+   "danno": 4,
+   "mun": 12,
+   "silu": 0
+  },
+  "Zuikaku": {
+   "nome": "Zuikaku",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 0
+  },
+  "Aoba": {
+   "nome": "Aoba",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 3,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 1
+  },
+  "Chicago": {
+   "nome": "Chicago",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Chokai": {
+   "nome": "Chokai",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Colorado": {
+   "nome": "Colorado",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 20,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Enterprise Solomons": {
+   "nome": "Enterprise",
+   "tipo": "CV",
+   "lato": "A",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 7,
+   "mun": 12,
+   "silu": 0
+  },
+  "Furutaka": {
+   "nome": "Furutaka",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 3,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 1
+  },
+  "Hiyo": {
+   "nome": "Hiyo",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 4,
+   "mv": 1,
+   "danno": 5,
+   "mun": 12,
+   "silu": 0
+  },
+  "Hornet": {
+   "nome": "Hornet",
+   "tipo": "CV",
+   "lato": "A",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 7,
+   "mun": 12,
+   "silu": 0
+  },
+  "Indianapolis": {
+   "nome": "Indianapolis",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Isuzu": {
+   "nome": "Isuzu",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 20,
+   "silu": 2
+  },
+  "Jintsu": {
+   "nome": "Jintsu",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 20,
+   "silu": 2
+  },
+  "Kitikami": {
+   "nome": "Kitikami",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 3,
+   "mun": 15,
+   "silu": 2
+  },
+  "Kumano": {
+   "nome": "Kumano",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Lexington": {
+   "nome": "Lexington",
+   "tipo": "CV",
+   "lato": "A",
+   "art": 1,
+   "aa": 4,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 0
+  },
+  "Maya": {
+   "nome": "Maya",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Mogami": {
+   "nome": "Mogami",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Nagara": {
+   "nome": "Nagara",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 20,
+   "silu": 2
+  },
+  "Nevada": {
+   "nome": "Nevada",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 18,
+   "aa": 3,
+   "mv": 1,
+   "danno": 10,
+   "mun": 24,
+   "silu": 0
+  },
+  "Portland": {
+   "nome": "Portland",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Raleigh": {
+   "nome": "Raleigh",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 2,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 15,
+   "silu": 0
+  },
+  "Sendai": {
+   "nome": "Sendai",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 20,
+   "silu": 2
+  },
+  "Shoho": {
+   "nome": "Shoho",
+   "tipo": "CVL",
+   "lato": "J",
+   "art": 1,
+   "aa": 2,
+   "mv": 2,
+   "danno": 3,
+   "mun": 16,
+   "silu": 0
+  },
+  "St Louis": {
+   "nome": "St Louis",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Yamashiro": {
+   "nome": "Yamashiro",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 15,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Yamato": {
+   "nome": "Yamato",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 28,
+   "aa": 4,
+   "mv": 2,
+   "danno": 18,
+   "mun": 24,
+   "silu": 0
+  },
+  "Yubari": {
+   "nome": "Yubari",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 5,
+   "mun": 20,
+   "silu": 2
+  },
+  "Zuikaku Coral Sea": {
+   "nome": "Zuikaku",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 0
+  },
+  "Haguro": {
+   "nome": "Haguro",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Kako": {
+   "nome": "Kako",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 3,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 1
+  },
+  "Kinugasa": {
+   "nome": "Kinugasa",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 3,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 1
+  },
+  "Myoko": {
+   "nome": "Myoko",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Tenryu": {
+   "nome": "Tenryu",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 5,
+   "mun": 20,
+   "silu": 2
+  },
+  "Vincennes": {
+   "nome": "Vincennes",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Houston": {
+   "nome": "Houston",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Maryland": {
+   "nome": "Maryland",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 20,
+   "aa": 3,
+   "mv": 1,
+   "danno": 11,
+   "mun": 24,
+   "silu": 0
+  },
+  "Nashville": {
+   "nome": "Nashville",
+   "tipo": "CL",
+   "lato": "A",
+   "art": 4,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "North Carolina": {
+   "nome": "North Carolina",
+   "tipo": "BB",
+   "lato": "A",
+   "art": 25,
+   "aa": 7,
+   "mv": 2,
+   "danno": 15,
+   "mun": 24,
+   "silu": 0
+  },
+  "Chikuma": {
+   "nome": "Chikuma",
+   "tipo": "CAV",
+   "lato": "J",
+   "art": 2,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Haruna": {
+   "nome": "Haruna",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 12,
+   "aa": 3,
+   "mv": 2,
+   "danno": 10,
+   "mun": 24,
+   "silu": 0
+  },
+  "Takao": {
+   "nome": "Takao",
+   "tipo": "CA",
+   "lato": "J",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Tone": {
+   "nome": "Tone",
+   "tipo": "CAV",
+   "lato": "J",
+   "art": 2,
+   "aa": 2,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 1
+  },
+  "Yura": {
+   "nome": "Yura",
+   "tipo": "CL",
+   "lato": "J",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 4,
+   "mun": 20,
+   "silu": 2
+  },
+  "Ryujo": {
+   "nome": "Ryujo",
+   "tipo": "CVL",
+   "lato": "J",
+   "art": 1,
+   "aa": 3,
+   "mv": 2,
+   "danno": 4,
+   "mun": 14,
+   "silu": 0
+  },
+  "Salt Lake City": {
+   "nome": "Salt Lake City",
+   "tipo": "CA",
+   "lato": "A",
+   "art": 5,
+   "aa": 2,
+   "mv": 2,
+   "danno": 5,
+   "mun": 15,
+   "silu": 0
+  },
+  "Wasp": {
+   "nome": "Wasp",
+   "tipo": "CV",
+   "lato": "A",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 0
+  },
+  "Shokaku Coral Sea": {
+   "nome": "Shokaku",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 5,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 0
+  }
+ },
+ "generiche": {
+  "DD": {
+   "tipo": "DD",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 2,
+   "mun": 1,
+   "silu": 1
+  },
+  "AP": {
+   "tipo": "AP",
+   "art": 0,
+   "aa": 0,
+   "mv": 1,
+   "danno": 1,
+   "mun": 0,
+   "silu": 0
+  },
+  "APD": {
+   "tipo": "APD",
+   "art": 1,
+   "aa": 1,
+   "mv": 2,
+   "danno": 2,
+   "mun": 1,
+   "silu": 0
+  },
+  "AO": {
+   "tipo": "AO",
+   "art": 0,
+   "aa": 1,
+   "mv": 1,
+   "danno": 1,
+   "mun": 0,
+   "silu": 0
+  },
+  "PG": {
+   "tipo": "PG",
+   "art": 0,
+   "aa": 1,
+   "mv": 1,
+   "danno": 1,
+   "mun": 0,
+   "silu": 0
+  }
+ },
+ "ops": {
+  "Enterprise": [
+   33,
+   11,
+   3,
+   9,
+   "CV"
+  ],
+  "Hornet": [
+   33,
+   11,
+   3,
+   9,
+   "CV"
+  ],
+  "Lexington": [
+   30,
+   12,
+   3,
+   8,
+   "CV"
+  ],
+  "Saratoga": [
+   32,
+   12,
+   3,
+   8,
+   "CV"
+  ],
+  "Wasp": [
+   28,
+   10,
+   3,
+   7,
+   "CV"
+  ],
+  "Yorktown": [
+   30,
+   11,
+   3,
+   9,
+   "CV"
+  ],
+  "Akagi": [
+   30,
+   12,
+   3,
+   8,
+   "CV"
+  ],
+  "Kaga": [
+   30,
+   12,
+   3,
+   8,
+   "CV"
+  ],
+  "Hiryu": [
+   24,
+   8,
+   3,
+   7,
+   "CV"
+  ],
+  "Soryu": [
+   24,
+   8,
+   3,
+   7,
+   "CV"
+  ],
+  "Hiyo": [
+   18,
+   7,
+   3,
+   6,
+   "CV"
+  ],
+  "Junyo": [
+   18,
+   7,
+   3,
+   6,
+   "CV"
+  ],
+  "Hosho": [
+   7,
+   3,
+   1,
+   3,
+   "CV"
+  ],
+  "Ryujo": [
+   16,
+   5,
+   2,
+   4,
+   "CV"
+  ],
+  "Shoho": [
+   10,
+   4,
+   2,
+   4,
+   "CV"
+  ],
+  "Zuiho": [
+   10,
+   4,
+   2,
+   4,
+   "CV"
+  ],
+  "Shokaku": [
+   28,
+   10,
+   3,
+   8,
+   "CV"
+  ],
+  "Zuikaku": [
+   28,
+   10,
+   3,
+   8,
+   "CV"
+  ],
+  "Chitose": [
+   8,
+   2,
+   1,
+   2,
+   "FP"
+  ],
+  "Kamikawa": [
+   7,
+   1,
+   1,
+   1,
+   "FP"
+  ]
+ },
+ "ops_tipo": {
+  "CAV": [
+   2,
+   1,
+   1,
+   1,
+   "FP"
+  ],
+  "BB_J": [
+   1,
+   1,
+   1,
+   1,
+   "FP"
+  ]
+ }
+}

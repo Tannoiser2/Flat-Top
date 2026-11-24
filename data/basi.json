@@ -1,0 +1,492 @@
+{
+ "australia": {
+  "*": {
+   "nome": "Australia",
+   "lato": "A",
+   "hex": [
+    1,
+    45
+   ],
+   "sigla": "A",
+   "mc": 999,
+   "lf": [
+    999,
+    999
+   ],
+   "rf": 25,
+   "ph": "LS",
+   "aaf": 0,
+   "sf": 0,
+   "fuori": true
+  }
+ },
+ "nuova_caledonia": {
+  "cs": {
+   "nome": "Nuova Caledonia",
+   "lato": "A",
+   "hex": [
+    60,
+    45
+   ],
+   "sigla": "N",
+   "mc": 999,
+   "lf": [
+    4,
+    4
+   ],
+   "rf": 2,
+   "ph": "S",
+   "aaf": 0,
+   "sf": 0,
+   "fuori": true
+  },
+  "*": {
+   "nome": "Nuova Caledonia",
+   "lato": "A",
+   "hex": [
+    60,
+    45
+   ],
+   "sigla": "N",
+   "mc": 999,
+   "lf": [
+    20,
+    20
+   ],
+   "rf": 12,
+   "ph": "LS",
+   "aaf": 0,
+   "sf": 0,
+   "fuori": true
+  }
+ },
+ "port_moresby": {
+  "*": {
+   "nome": "Port Moresby",
+   "lato": "A",
+   "hex": [
+    2,
+    22
+   ],
+   "sigla": "M",
+   "mc": 999,
+   "lf": [
+    20,
+    8
+   ],
+   "rf": 8,
+   "ph": "L",
+   "aaf": 10,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "espiritu_santo": {
+  "es": {
+   "nome": "Espiritu Santo",
+   "lato": "A",
+   "hex": [
+    78,
+    42
+   ],
+   "sigla": "E",
+   "mc": 999,
+   "lf": [
+    5,
+    3
+   ],
+   "rf": 2,
+   "ph": "LS",
+   "aaf": 4,
+   "sf": 0,
+   "fuori": false
+  },
+  "*": {
+   "nome": "Espiritu Santo",
+   "lato": "A",
+   "hex": [
+    78,
+    42
+   ],
+   "sigla": "E",
+   "mc": 999,
+   "lf": [
+    10,
+    8
+   ],
+   "rf": 10,
+   "ph": "LS",
+   "aaf": 12,
+   "sf": 3,
+   "fuori": false
+  }
+ },
+ "gili_gili": {
+  "es": {
+   "nome": "Gili-Gili",
+   "lato": "A",
+   "hex": [
+    15,
+    25
+   ],
+   "sigla": "G",
+   "mc": 10,
+   "lf": [
+    6,
+    2
+   ],
+   "rf": 5,
+   "ph": "L",
+   "aaf": 2,
+   "sf": 0,
+   "fuori": false
+  },
+  "*": {
+   "nome": "Gili-Gili",
+   "lato": "A",
+   "hex": [
+    15,
+    25
+   ],
+   "sigla": "G",
+   "mc": 999,
+   "lf": [
+    10,
+    6
+   ],
+   "rf": 5,
+   "ph": "L",
+   "aaf": 7,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "henderson": {
+  "es": {
+   "nome": "Henderson",
+   "lato": "A",
+   "hex": [
+    52,
+    22
+   ],
+   "sigla": "H",
+   "mc": 999,
+   "lf": [
+    8,
+    4
+   ],
+   "rf": 5,
+   "ph": "L",
+   "aaf": 5,
+   "sf": 0,
+   "fuori": false
+  },
+  "*": {
+   "nome": "Henderson",
+   "lato": "A",
+   "hex": [
+    52,
+    22
+   ],
+   "sigla": "H",
+   "mc": 999,
+   "lf": [
+    12,
+    6
+   ],
+   "rf": 8,
+   "ph": "L",
+   "aaf": 10,
+   "sf": 1,
+   "fuori": false
+  }
+ },
+ "ndeni": {
+  "*": {
+   "nome": "Ndeni",
+   "lato": "A",
+   "hex": [
+    73,
+    26
+   ],
+   "sigla": "ND",
+   "mc": 6,
+   "lf": [
+    6,
+    4
+   ],
+   "rf": 2,
+   "ph": "S",
+   "aaf": 2,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "buka": {
+  "*": {
+   "nome": "Buka",
+   "lato": "J",
+   "hex": [
+    32,
+    7
+   ],
+   "sigla": "BK",
+   "mc": 8,
+   "lf": [
+    6,
+    4
+   ],
+   "rf": 2,
+   "ph": "L",
+   "aaf": 3,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "buna": {
+  "es": {
+   "nome": "Buna",
+   "lato": "J",
+   "hex": [
+    7,
+    19
+   ],
+   "sigla": "BA",
+   "mc": 999,
+   "lf": [
+    6,
+    3
+   ],
+   "rf": 3,
+   "ph": "L",
+   "aaf": 3,
+   "sf": 0,
+   "fuori": false
+  },
+  "*": {
+   "nome": "Buna",
+   "lato": "J",
+   "hex": [
+    7,
+    19
+   ],
+   "sigla": "BA",
+   "mc": 999,
+   "lf": [
+    10,
+    6
+   ],
+   "rf": 5,
+   "ph": "L",
+   "aaf": 7,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "buin": {
+  "*": {
+   "nome": "Buin",
+   "lato": "J",
+   "hex": [
+    36,
+    13
+   ],
+   "sigla": "BN",
+   "mc": 999,
+   "lf": [
+    10,
+    5
+   ],
+   "rf": 5,
+   "ph": "L",
+   "aaf": 7,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "gasmata": {
+  "*": {
+   "nome": "Gasmata",
+   "lato": "J",
+   "hex": [
+    15,
+    10
+   ],
+   "sigla": "G",
+   "mc": 999,
+   "lf": [
+    8,
+    4
+   ],
+   "rf": 4,
+   "ph": "L",
+   "aaf": 5,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "kavieng": {
+  "*": {
+   "nome": "Kavieng",
+   "lato": "J",
+   "hex": [
+    18,
+    -2
+   ],
+   "sigla": "K",
+   "mc": 999,
+   "lf": [
+    10,
+    5
+   ],
+   "rf": 5,
+   "ph": "L",
+   "aaf": 0,
+   "sf": 0,
+   "fuori": true
+  }
+ },
+ "lae": {
+  "cs": {
+   "nome": "Lae",
+   "lato": "J",
+   "hex": [
+    2,
+    13
+   ],
+   "sigla": "L",
+   "mc": 999,
+   "lf": [
+    10,
+    5
+   ],
+   "rf": 5,
+   "ph": "L",
+   "aaf": 5,
+   "sf": 0,
+   "fuori": false
+  },
+  "*": {
+   "nome": "Lae",
+   "lato": "J",
+   "hex": [
+    2,
+    13
+   ],
+   "sigla": "L",
+   "mc": 999,
+   "lf": [
+    12,
+    5
+   ],
+   "rf": 6,
+   "ph": "L",
+   "aaf": 10,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "rabaul": {
+  "cs": {
+   "nome": "Rabaul",
+   "lato": "J",
+   "hex": [
+    23,
+    3
+   ],
+   "sigla": "R",
+   "mc": 999,
+   "lf": [
+    12,
+    4
+   ],
+   "rf": 7,
+   "ph": "LS",
+   "aaf": 9,
+   "sf": 0,
+   "fuori": false
+  },
+  "*": {
+   "nome": "Rabaul",
+   "lato": "J",
+   "hex": [
+    23,
+    3
+   ],
+   "sigla": "R",
+   "mc": 999,
+   "lf": [
+    20,
+    9
+   ],
+   "rf": 12,
+   "ph": "LS",
+   "aaf": 15,
+   "sf": 8,
+   "fuori": false
+  }
+ },
+ "shortland": {
+  "*": {
+   "nome": "Shortland",
+   "lato": "J",
+   "hex": [
+    37,
+    13
+   ],
+   "sigla": "S",
+   "mc": 999,
+   "lf": [
+    8,
+    4
+   ],
+   "rf": 4,
+   "ph": "S",
+   "aaf": 5,
+   "sf": 0,
+   "fuori": false
+  }
+ },
+ "truk": {
+  "*": {
+   "nome": "Truk",
+   "lato": "J",
+   "hex": [
+    23,
+    -4
+   ],
+   "sigla": "TR",
+   "mc": 999,
+   "lf": [
+    999,
+    999
+   ],
+   "rf": 20,
+   "ph": "LS",
+   "aaf": 0,
+   "sf": 0,
+   "fuori": true
+  }
+ },
+ "tulagi": {
+  "*": {
+   "nome": "Tulagi",
+   "lato": "J",
+   "hex": [
+    53,
+    21
+   ],
+   "sigla": "T",
+   "mc": 6,
+   "lf": [
+    6,
+    3
+   ],
+   "rf": 2,
+   "ph": "S",
+   "aaf": 1,
+   "sf": 0,
+   "fuori": false
+  }
+ }
+}

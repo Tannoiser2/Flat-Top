@@ -1,0 +1,2416 @@
+{
+ "scenari": [
+  {
+   "id": "rabaul",
+   "nome": "Anelli attorno a Rabaul",
+   "data": "23 febbraio 1942",
+   "giorno": 0,
+   "ora": 6,
+   "turni": 13,
+   "mesi": [
+    "23 feb"
+   ],
+   "meteo": "sparse",
+   "profilo": "cs",
+   "mezza_mappa": "ovest",
+   "descrizione": "Il Lexington tenta un'incursione contro Rabaul. Scenario introduttivo: poche navi e pochi aerei, 13 turni dall'alba al tramonto.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Lexington",
+       "Minneapolis",
+       "San Francisco",
+       "Indianapolis",
+       "Pensacola",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       38,
+       9
+      ],
+      "aerei": {
+       "Lexington": {
+        "Wildcat": 8,
+        "Dauntless": 12,
+        "Devastator": 4
+       }
+      }
+     }
+    ],
+    "basi": {
+     "port_moresby": {
+      "P-40": 12,
+      "Catalina": 4
+     }
+    },
+    "radar": [
+     "Lexington",
+     "port_moresby"
+    ]
+   },
+   "J": {
+    "tf": [],
+    "basi": {
+     "rabaul": {
+      "Zero": 10,
+      "Kate": 10,
+      "Mavis": 4,
+      "Jake": 1,
+      "Rufe": 1
+     },
+     "kavieng": {
+      "Nell": 12
+     },
+     "gasmata": {},
+     "truk": {
+      "Mavis": 4
+     }
+    },
+    "radar": []
+   },
+   "speciali": {
+    "wildcat7": true,
+    "tf_unica_A": true,
+    "no_decollo_J_turno1": true,
+    "rinforzi_J_avvistamento": {
+     "base": "truk",
+     "aerei": {
+      "Zero": 5,
+      "Betty": 5
+     }
+    }
+   },
+   "vittoria": {
+    "tipo": "rabaul",
+    "auto": 0,
+    "min": 20
+   },
+   "obiettivi": {
+    "A": {
+     "attacca_base": "rabaul"
+    },
+    "J": {
+     "difendi": "rabaul"
+    }
+   }
+  },
+  {
+   "id": "coral_battaglia",
+   "nome": "Mar dei Coralli - La battaglia",
+   "data": "8 maggio 1942",
+   "giorno": 4,
+   "ora": 1,
+   "turni": 18,
+   "meteo": "fronte",
+   "profilo": "cs",
+   "descrizione": "Versione breve: l'8 maggio le portaerei si cercano a sud delle Salomone. Il Giappone deve scortare i trasporti verso Port Moresby.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Lexington",
+       "Minneapolis",
+       "New Orleans",
+       "Astoria",
+       "Chester",
+       "Portland",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       34,
+       33
+      ],
+      "aerei": {
+       "Lexington": {
+        "Wildcat": 7,
+        "Dauntless": 13,
+        "Devastator": 4
+       }
+      }
+     },
+     {
+      "navi": [
+       "Yorktown",
+       "Australia",
+       "Chicago",
+       "Hobart",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AO",
+       "AO"
+      ],
+      "hex": [
+       31,
+       35
+      ],
+      "aerei": {
+       "Yorktown": {
+        "Wildcat": 7,
+        "Dauntless": 12,
+        "Devastator": 4
+       }
+      }
+     }
+    ],
+    "basi": {
+     "nuova_caledonia": {
+      "Catalina": 4
+     },
+     "port_moresby": {
+      "Hudson": 2,
+      "B-26": 12,
+      "B-25": 5,
+      "Dauntless": 3,
+      "P-39": 12,
+      "P-40": 2
+     },
+     "australia": {
+      "B-17": 5,
+      "Catalina": 1
+     }
+    },
+    "radar": [
+     "Lexington",
+     "Yorktown",
+     "port_moresby",
+     "nuova_caledonia",
+     "australia"
+    ]
+   },
+   "J": {
+    "tf": [
+     {
+      "navi": [
+       "Shokaku Coral Sea",
+       "Zuikaku Coral Sea",
+       "Myoko",
+       "Haguro",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       45,
+       23
+      ],
+      "aerei": {
+       "Shokaku Coral Sea": {
+        "Zero": 6,
+        "Val": 7,
+        "Kate": 6
+       },
+       "Zuikaku Coral Sea": {
+        "Zero": 6,
+        "Val": 7,
+        "Kate": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Shoho",
+       "Aoba",
+       "Kako",
+       "Kinugasa",
+       "Furutaka",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AO"
+      ],
+      "hex": [
+       41,
+       22
+      ],
+      "aerei": {
+       "Shoho": {
+        "Zero": 4,
+        "Kate": 6
+       }
+      }
+     },
+     {
+      "navi": [
+       "Kamikawa",
+       "PG",
+       "PG"
+      ],
+      "hex": [
+       24,
+       26
+      ],
+      "aerei": {
+       "Kamikawa": {
+        "Dave": 3,
+        "Pete": 4
+       }
+      },
+      "ancorata": true
+     },
+     {
+      "navi": [
+       "Yubari",
+       "Tenryu",
+       "Tatsuta",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP"
+      ],
+      "hex": [
+       28,
+       21
+      ]
+     },
+     {
+      "navi": [
+       "AP",
+       "AP",
+       "PG",
+       "PG",
+       "AO",
+       "AO",
+       "AO"
+      ],
+      "hex": [
+       24,
+       22
+      ]
+     }
+    ],
+    "basi": {
+     "rabaul": {
+      "Zero": 15,
+      "Betty": 12
+     },
+     "lae": {
+      "Zero": 6
+     },
+     "kavieng": {
+      "Nell": 16
+     },
+     "tulagi": {
+      "Mavis": 3,
+      "Rufe": 1
+     },
+     "shortland": {
+      "Mavis": 2
+     },
+     "truk": {}
+    },
+    "radar": []
+   },
+   "speciali": {
+    "wildcat7": true,
+    "sbarco": {
+     "J": {
+      "hex": [
+       [
+        2,
+        22
+       ]
+      ],
+      "nome": "Port Moresby"
+     }
+    },
+    "seaplane_kamikawa": true
+   },
+   "vittoria": {
+    "tipo": "coral",
+    "auto": 100,
+    "min": 50
+   },
+   "obiettivi": {
+    "A": {
+     "difendi": "port_moresby",
+     "caccia_portaerei": true
+    },
+    "J": {
+     "sbarco": "port_moresby",
+     "caccia_portaerei": true
+    }
+   }
+  },
+  {
+   "id": "coral_giorni",
+   "nome": "Mar dei Coralli - I giorni cruciali",
+   "data": "7-8 maggio 1942",
+   "giorno": 3,
+   "ora": 1,
+   "turni": 42,
+   "meteo": "fronte",
+   "profilo": "cs",
+   "descrizione": "Dal 7 maggio all'8 maggio: lo Shoho scorta l'invasione di Port Moresby, le portaerei di Takagi arrivano da est.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Lexington",
+       "Minneapolis",
+       "New Orleans",
+       "Astoria",
+       "Chester",
+       "Portland",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       30,
+       38
+      ],
+      "aerei": {
+       "Lexington": {
+        "Wildcat": 7,
+        "Dauntless": 13,
+        "Devastator": 4
+       }
+      }
+     },
+     {
+      "navi": [
+       "Yorktown",
+       "Australia",
+       "Chicago",
+       "Hobart",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AO",
+       "AO"
+      ],
+      "hex": [
+       36,
+       39
+      ],
+      "aerei": {
+       "Yorktown": {
+        "Wildcat": 7,
+        "Dauntless": 12,
+        "Devastator": 4
+       }
+      }
+     }
+    ],
+    "basi": {
+     "nuova_caledonia": {
+      "Catalina": 4
+     },
+     "port_moresby": {
+      "Hudson": 2,
+      "B-26": 12,
+      "B-25": 5,
+      "Dauntless": 3,
+      "P-39": 12,
+      "P-40": 2
+     },
+     "australia": {
+      "B-17": 5,
+      "Catalina": 1
+     }
+    },
+    "radar": [
+     "Lexington",
+     "Yorktown",
+     "port_moresby",
+     "nuova_caledonia",
+     "australia"
+    ]
+   },
+   "J": {
+    "tf": [
+     {
+      "navi": [
+       "Shokaku Coral Sea",
+       "Zuikaku Coral Sea",
+       "Myoko",
+       "Haguro",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AO"
+      ],
+      "hex": [
+       49,
+       19
+      ],
+      "aerei": {
+       "Shokaku Coral Sea": {
+        "Zero": 6,
+        "Val": 7,
+        "Kate": 6
+       },
+       "Zuikaku Coral Sea": {
+        "Zero": 6,
+        "Val": 7,
+        "Kate": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Shoho",
+       "Aoba",
+       "Kako",
+       "Kinugasa",
+       "Furutaka",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AO"
+      ],
+      "hex": [
+       27,
+       23
+      ],
+      "aerei": {
+       "Shoho": {
+        "Zero": 4,
+        "Kate": 6
+       }
+      }
+     },
+     {
+      "navi": [
+       "Kamikawa",
+       "Yubari",
+       "Tenryu",
+       "Tatsuta",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "PG",
+       "PG",
+       "PG",
+       "PG"
+      ],
+      "hex": [
+       26,
+       21
+      ],
+      "aerei": {
+       "Kamikawa": {
+        "Dave": 3,
+        "Pete": 4
+       }
+      }
+     },
+     {
+      "navi": [
+       "AP",
+       "AP",
+       "AO",
+       "AO"
+      ],
+      "hex": [
+       23,
+       21
+      ]
+     }
+    ],
+    "basi": {
+     "rabaul": {
+      "Zero": 15,
+      "Betty": 12
+     },
+     "lae": {
+      "Zero": 6
+     },
+     "kavieng": {
+      "Nell": 16
+     },
+     "tulagi": {
+      "Mavis": 3,
+      "Rufe": 1
+     },
+     "shortland": {
+      "Mavis": 2
+     },
+     "truk": {}
+    },
+    "radar": []
+   },
+   "speciali": {
+    "wildcat7": true,
+    "sbarco": {
+     "J": {
+      "hex": [
+       [
+        2,
+        22
+       ]
+      ],
+      "nome": "Port Moresby"
+     }
+    }
+   },
+   "vittoria": {
+    "tipo": "coral",
+    "auto": 100,
+    "min": 50
+   },
+   "obiettivi": {
+    "A": {
+     "difendi": "port_moresby",
+     "caccia_portaerei": true
+    },
+    "J": {
+     "sbarco": "port_moresby",
+     "caccia_portaerei": true
+    }
+   }
+  },
+  {
+   "id": "salomone_battaglia",
+   "nome": "Salomone orientali - La battaglia",
+   "data": "24 agosto 1942",
+   "giorno": 0,
+   "ora": 1,
+   "turni": 18,
+   "meteo": "sparse",
+   "profilo": "es",
+   "descrizione": "Versione breve: il 24 agosto la Kido Butai scende verso Guadalcanal per coprire un convoglio. Le tre portaerei americane la aspettano a est.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Saratoga",
+       "Minneapolis",
+       "New Orleans",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       64,
+       16
+      ],
+      "aerei": {
+       "Saratoga": {
+        "Wildcat": 12,
+        "Dauntless": 13,
+        "Avenger": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Enterprise Solomons",
+       "North Carolina",
+       "Portland",
+       "Atlanta",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       62,
+       19
+      ],
+      "aerei": {
+       "Enterprise Solomons": {
+        "Wildcat": 12,
+        "Dauntless": 12,
+        "Avenger": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Wasp",
+       "San Juan",
+       "San Francisco",
+       "Salt Lake City",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AO",
+       "AO",
+       "AO"
+      ],
+      "hex": [
+       70,
+       21
+      ],
+      "aerei": {
+       "Wasp": {
+        "Wildcat": 10,
+        "Dauntless": 11,
+        "Avenger": 5
+       }
+      }
+     }
+    ],
+    "basi": {
+     "henderson": {
+      "Wildcat": 4,
+      "Dauntless": 3,
+      "P-39": 2
+     },
+     "espiritu_santo": {
+      "Catalina": 3,
+      "B-17": 3,
+      "Hudson": 2
+     },
+     "ndeni": {
+      "Catalina": 2
+     },
+     "nuova_caledonia": {},
+     "gili_gili": {
+      "P-40": 6,
+      "P-39": 4
+     },
+     "port_moresby": {
+      "P-40": 10,
+      "P-39": 2,
+      "B-26": 20,
+      "B-25": 10,
+      "Hudson": 1,
+      "A-20": 3,
+      "Beaufort": 3,
+      "Beaufighter": 2
+     },
+     "australia": {
+      "B-17": 8,
+      "Catalina": 1
+     }
+    },
+    "radar": [
+     "*navi_maggiori",
+     "henderson",
+     "espiritu_santo",
+     "gili_gili",
+     "port_moresby",
+     "ndeni",
+     "nuova_caledonia",
+     "australia"
+    ]
+   },
+   "J": {
+    "tf": [
+     {
+      "navi": [
+       "Shokaku",
+       "Zuikaku",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       46,
+       3
+      ],
+      "aerei": {
+       "Shokaku": {
+        "Zero": 9,
+        "Val": 9,
+        "Kate": 9,
+        "Judy": 1
+       },
+       "Zuikaku": {
+        "Zero": 9,
+        "Val": 8,
+        "Kate": 8
+       }
+      }
+     },
+     {
+      "navi": [
+       "Ryujo",
+       "Tone",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       42,
+       6
+      ],
+      "aerei": {
+       "Ryujo": {
+        "Zero": 7
+       },
+       "Tone": {
+        "Pete": 1,
+        "Jake": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Hiei",
+       "Kirishima",
+       "Chikuma",
+       "Kumano",
+       "Suzuya",
+       "Nagara",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       49,
+       5
+      ],
+      "aerei": {
+       "Chikuma": {
+        "Pete": 1
+       },
+       "Hiei": {
+        "Pete": 1
+       },
+       "Kirishima": {
+        "Pete": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Mutsu",
+       "Atago",
+       "Maya",
+       "Takao",
+       "Myoko",
+       "Haguro",
+       "Yura",
+       "Chitose",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       53,
+       3
+      ],
+      "aerei": {
+       "Chitose": {
+        "Pete": 4,
+        "Jake": 3
+       }
+      }
+     },
+     {
+      "navi": [
+       "Jintsu",
+       "APD",
+       "APD",
+       "APD",
+       "APD",
+       "AP",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       49,
+       11
+      ]
+     },
+     {
+      "navi": [
+       "Aoba",
+       "Kinugasa",
+       "Furutaka",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       36,
+       9
+      ]
+     },
+     {
+      "navi": [
+       "Tenryu",
+       "Tatsuta",
+       "AP",
+       "AP",
+       "PG",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       23,
+       3
+      ],
+      "ancorata": true
+     },
+     {
+      "navi": [
+       "AP",
+       "AP",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       14,
+       21
+      ]
+     }
+    ],
+    "basi": {
+     "rabaul": {
+      "Zero": 14,
+      "Betty": 8,
+      "Nell": 3,
+      "Mavis": 2,
+      "Emily": 1
+     },
+     "buka": {
+      "Zero": 6
+     },
+     "buna": {
+      "Val": 2
+     },
+     "shortland": {
+      "Rufe": 2
+     },
+     "gasmata": {},
+     "lae": {},
+     "kavieng": {},
+     "truk": {}
+    },
+    "radar": [
+     "rabaul",
+     "lae"
+    ]
+   },
+   "speciali": {
+    "sbarco": {
+     "J": {
+      "hex": [
+       [
+        15,
+        25
+       ]
+      ],
+      "isola": "guadalcanal",
+      "nome": "Gili-Gili o Guadalcanal"
+     }
+    },
+    "wasp_notte": true
+   },
+   "vittoria": {
+    "tipo": "standard",
+    "auto": 200,
+    "min": 50,
+    "bonus_sbarco_J": 50
+   },
+   "obiettivi": {
+    "A": {
+     "difendi": "henderson",
+     "caccia_portaerei": true
+    },
+    "J": {
+     "sbarco": "guadalcanal",
+     "caccia_portaerei": true
+    }
+   }
+  },
+  {
+   "id": "salomone_campagna",
+   "nome": "Salomone orientali - La campagna",
+   "data": "24-26 agosto 1942",
+   "giorno": 0,
+   "ora": 1,
+   "turni": 66,
+   "meteo": "sparse",
+   "profilo": "es",
+   "descrizione": "Tre giorni di campagna: il Wasp parte da sud-est, la flotta giapponese scende dal nord e i convogli puntano su Guadalcanal e Gili-Gili.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Saratoga",
+       "Minneapolis",
+       "New Orleans",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       63,
+       12
+      ],
+      "aerei": {
+       "Saratoga": {
+        "Wildcat": 12,
+        "Dauntless": 13,
+        "Avenger": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Enterprise Solomons",
+       "North Carolina",
+       "Portland",
+       "Atlanta",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       61,
+       15
+      ],
+      "aerei": {
+       "Enterprise Solomons": {
+        "Wildcat": 12,
+        "Dauntless": 12,
+        "Avenger": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Wasp",
+       "San Juan",
+       "San Francisco",
+       "Salt Lake City",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AO",
+       "AO",
+       "AO"
+      ],
+      "hex": [
+       74,
+       32
+      ],
+      "aerei": {
+       "Wasp": {
+        "Wildcat": 10,
+        "Dauntless": 11,
+        "Avenger": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "DD"
+      ],
+      "hex": [
+       15,
+       25
+      ],
+      "ancorata": true
+     }
+    ],
+    "basi": {
+     "henderson": {
+      "Wildcat": 4,
+      "Dauntless": 3,
+      "P-39": 2
+     },
+     "espiritu_santo": {
+      "Catalina": 3,
+      "B-17": 3,
+      "Hudson": 2
+     },
+     "ndeni": {
+      "Catalina": 2
+     },
+     "nuova_caledonia": {},
+     "gili_gili": {
+      "P-40": 6,
+      "P-39": 4
+     },
+     "port_moresby": {
+      "P-40": 10,
+      "P-39": 2,
+      "B-26": 20,
+      "B-25": 10,
+      "Hudson": 1,
+      "A-20": 3,
+      "Beaufort": 3,
+      "Beaufighter": 2
+     },
+     "australia": {
+      "B-17": 8,
+      "Catalina": 1
+     }
+    },
+    "radar": [
+     "*navi_maggiori",
+     "henderson",
+     "espiritu_santo",
+     "gili_gili",
+     "port_moresby",
+     "ndeni",
+     "nuova_caledonia",
+     "australia"
+    ]
+   },
+   "J": {
+    "tf": [
+     {
+      "navi": [
+       "Shokaku",
+       "Zuikaku",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       46,
+       3
+      ],
+      "aerei": {
+       "Shokaku": {
+        "Zero": 9,
+        "Val": 9,
+        "Kate": 9,
+        "Judy": 1
+       },
+       "Zuikaku": {
+        "Zero": 9,
+        "Val": 8,
+        "Kate": 8
+       }
+      }
+     },
+     {
+      "navi": [
+       "Ryujo",
+       "Tone",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       42,
+       6
+      ],
+      "aerei": {
+       "Ryujo": {
+        "Zero": 7
+       },
+       "Tone": {
+        "Pete": 1,
+        "Jake": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Hiei",
+       "Kirishima",
+       "Chikuma",
+       "Kumano",
+       "Suzuya",
+       "Nagara",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       49,
+       5
+      ],
+      "aerei": {
+       "Chikuma": {
+        "Pete": 1
+       },
+       "Hiei": {
+        "Pete": 1
+       },
+       "Kirishima": {
+        "Pete": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Mutsu",
+       "Atago",
+       "Maya",
+       "Takao",
+       "Myoko",
+       "Haguro",
+       "Yura",
+       "Chitose",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       53,
+       3
+      ],
+      "aerei": {
+       "Chitose": {
+        "Pete": 4,
+        "Jake": 3
+       }
+      }
+     },
+     {
+      "navi": [
+       "Jintsu",
+       "APD",
+       "APD",
+       "APD",
+       "APD",
+       "AP",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       49,
+       11
+      ]
+     },
+     {
+      "navi": [
+       "Aoba",
+       "Kinugasa",
+       "Furutaka",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       36,
+       9
+      ]
+     },
+     {
+      "navi": [
+       "Tenryu",
+       "Tatsuta",
+       "AP",
+       "AP",
+       "PG",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       23,
+       3
+      ],
+      "ancorata": true
+     },
+     {
+      "navi": [
+       "AP",
+       "AP",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       14,
+       21
+      ]
+     }
+    ],
+    "basi": {
+     "rabaul": {
+      "Zero": 14,
+      "Betty": 8,
+      "Nell": 3,
+      "Mavis": 2,
+      "Emily": 1
+     },
+     "buka": {
+      "Zero": 6
+     },
+     "buna": {
+      "Val": 2
+     },
+     "shortland": {
+      "Rufe": 2
+     },
+     "gasmata": {},
+     "lae": {},
+     "kavieng": {},
+     "truk": {}
+    },
+    "radar": [
+     "rabaul",
+     "lae"
+    ]
+   },
+   "speciali": {
+    "sbarco": {
+     "J": {
+      "hex": [
+       [
+        15,
+        25
+       ]
+      ],
+      "isola": "guadalcanal",
+      "nome": "Gili-Gili o Guadalcanal"
+     }
+    },
+    "wasp_notte": true
+   },
+   "vittoria": {
+    "tipo": "standard",
+    "auto": 200,
+    "min": 50,
+    "bonus_sbarco_J": 50
+   },
+   "obiettivi": {
+    "A": {
+     "difendi": "henderson",
+     "caccia_portaerei": true
+    },
+    "J": {
+     "sbarco": "guadalcanal",
+     "caccia_portaerei": true
+    }
+   }
+  },
+  {
+   "id": "santacruz_battaglia",
+   "nome": "Santa Cruz - La battaglia",
+   "data": "26 ottobre 1942",
+   "giorno": 1,
+   "ora": 1,
+   "turni": 18,
+   "meteo": "sparse",
+   "profilo": "sc",
+   "descrizione": "Versione breve: il 26 ottobre Hornet ed Enterprise affrontano quattro portaerei giapponesi a nord delle isole Santa Cruz.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Hornet",
+       "Enterprise",
+       "South Dakota",
+       "Portland",
+       "Northampton",
+       "Pensacola",
+       "San Juan",
+       "San Diego",
+       "Juneau",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       70,
+       24
+      ],
+      "aerei": {
+       "Enterprise": {
+        "Wildcat": 12,
+        "Dauntless": 12,
+        "Avenger": 5
+       },
+       "Hornet": {
+        "Wildcat": 11,
+        "Dauntless": 12,
+        "Avenger": 4
+       }
+      }
+     },
+     {
+      "navi": [
+       "Washington",
+       "San Francisco",
+       "Helena",
+       "Atlanta",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       51,
+       26
+      ]
+     },
+     {
+      "navi": [
+       "DD",
+       "DD",
+       "PG"
+      ],
+      "hex": [
+       50,
+       21
+      ]
+     }
+    ],
+    "basi": {
+     "henderson": {
+      "Wildcat": 8,
+      "P-39": 3,
+      "Dauntless": 6
+     },
+     "espiritu_santo": {
+      "Hudson": 3,
+      "Catalina": 7,
+      "B-17": 10
+     },
+     "nuova_caledonia": {
+      "Catalina": 2
+     },
+     "gili_gili": {
+      "P-40": 8,
+      "P-39": 4
+     },
+     "port_moresby": {
+      "P-40": 16,
+      "B-26": 24,
+      "B-25": 16,
+      "Hudson": 2,
+      "A-20": 4,
+      "Beaufort": 4,
+      "Beaufighter": 4
+     },
+     "australia": {
+      "B-17": 9,
+      "Catalina": 2
+     }
+    },
+    "radar": [
+     "*tutte",
+     "henderson",
+     "espiritu_santo",
+     "gili_gili",
+     "port_moresby",
+     "ndeni",
+     "nuova_caledonia",
+     "australia"
+    ]
+   },
+   "J": {
+    "tf": [
+     {
+      "navi": [
+       "Shokaku",
+       "Zuikaku",
+       "Zuiho",
+       "Kumano",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       61,
+       12
+      ],
+      "aerei": {
+       "Shokaku": {
+        "Zero": 9,
+        "Val": 2,
+        "Kate": 9,
+        "Judy": 1
+       },
+       "Zuikaku": {
+        "Zero": 9,
+        "Val": 9,
+        "Kate": 8
+       },
+       "Zuiho": {
+        "Zero": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Junyo",
+       "Isuzu",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       57,
+       14
+      ],
+      "aerei": {
+       "Junyo": {
+        "Zero": 8,
+        "Val": 10
+       }
+      }
+     },
+     {
+      "navi": [
+       "Kongo",
+       "Haruna",
+       "Atago",
+       "Takao",
+       "Myoko",
+       "Maya",
+       "Tone",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       62,
+       15
+      ],
+      "aerei": {
+       "Tone": {
+        "Pete": 1,
+        "Jake": 1
+       },
+       "Kongo": {
+        "Pete": 1
+       },
+       "Haruna": {
+        "Pete": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Hiei",
+       "Kirishima",
+       "Chikuma",
+       "Suzuya",
+       "Chokai",
+       "Nagara",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       64,
+       13
+      ],
+      "aerei": {
+       "Chikuma": {
+        "Pete": 1,
+        "Jake": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Yura",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       50,
+       20
+      ]
+     },
+     {
+      "navi": [
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       37,
+       13
+      ]
+     }
+    ],
+    "basi": {
+     "rabaul": {
+      "Zero": 15,
+      "Betty": 11,
+      "Nell": 9,
+      "Mavis": 2,
+      "Emily": 1
+     },
+     "buin": {
+      "Zero": 9,
+      "Val": 15
+     },
+     "buka": {
+      "Zero": 6,
+      "Kate": 2
+     },
+     "shortland": {
+      "Rufe": 2,
+      "Mavis": 2
+     },
+     "buna": {
+      "Kate": 4
+     },
+     "gasmata": {},
+     "lae": {},
+     "kavieng": {},
+     "truk": {}
+    },
+    "radar": [
+     "rabaul",
+     "lae",
+     "shortland",
+     "gasmata",
+     "buna"
+    ]
+   },
+   "speciali": {
+    "henderson_ripara2": true
+   },
+   "vittoria": {
+    "tipo": "standard",
+    "auto": 250,
+    "min": 200
+   },
+   "obiettivi": {
+    "A": {
+     "difendi": "henderson",
+     "caccia_portaerei": true
+    },
+    "J": {
+     "attacca_base": "henderson",
+     "caccia_portaerei": true
+    }
+   }
+  },
+  {
+   "id": "santacruz_campagna",
+   "nome": "Santa Cruz - La campagna",
+   "data": "25-27 ottobre 1942",
+   "giorno": 0,
+   "ora": 1,
+   "turni": 66,
+   "meteo": "sparse",
+   "profilo": "sc",
+   "descrizione": "Tre giorni attorno alle Santa Cruz: la flotta giapponese a nord attende la caduta di Henderson, le portaerei americane arrivano da Ndeni.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Hornet",
+       "Enterprise",
+       "South Dakota",
+       "Portland",
+       "Northampton",
+       "Pensacola",
+       "San Juan",
+       "San Diego",
+       "Juneau",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       72,
+       30
+      ],
+      "aerei": {
+       "Enterprise": {
+        "Wildcat": 12,
+        "Dauntless": 12,
+        "Avenger": 5
+       },
+       "Hornet": {
+        "Wildcat": 11,
+        "Dauntless": 12,
+        "Avenger": 4
+       }
+      }
+     },
+     {
+      "navi": [
+       "Washington",
+       "San Francisco",
+       "Helena",
+       "Atlanta",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       55,
+       27
+      ]
+     },
+     {
+      "navi": [
+       "DD",
+       "DD",
+       "PG",
+       "PG"
+      ],
+      "hex": [
+       52,
+       21
+      ]
+     }
+    ],
+    "basi": {
+     "henderson": {
+      "Wildcat": 8,
+      "P-39": 3,
+      "Dauntless": 6
+     },
+     "espiritu_santo": {
+      "Hudson": 3,
+      "Catalina": 7,
+      "B-17": 10
+     },
+     "nuova_caledonia": {
+      "Catalina": 2
+     },
+     "gili_gili": {
+      "P-40": 8,
+      "P-39": 4
+     },
+     "port_moresby": {
+      "P-40": 16,
+      "B-26": 24,
+      "B-25": 16,
+      "Hudson": 2,
+      "A-20": 4,
+      "Beaufort": 4,
+      "Beaufighter": 4
+     },
+     "australia": {
+      "B-17": 9,
+      "Catalina": 2
+     }
+    },
+    "radar": [
+     "*tutte",
+     "henderson",
+     "espiritu_santo",
+     "gili_gili",
+     "port_moresby",
+     "ndeni",
+     "nuova_caledonia",
+     "australia"
+    ]
+   },
+   "J": {
+    "tf": [
+     {
+      "navi": [
+       "Shokaku",
+       "Zuikaku",
+       "Zuiho",
+       "Kumano",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       60,
+       3
+      ],
+      "aerei": {
+       "Shokaku": {
+        "Zero": 9,
+        "Val": 2,
+        "Kate": 9,
+        "Judy": 1
+       },
+       "Zuikaku": {
+        "Zero": 9,
+        "Val": 9,
+        "Kate": 8
+       },
+       "Zuiho": {
+        "Zero": 5
+       }
+      }
+     },
+     {
+      "navi": [
+       "Junyo",
+       "Isuzu",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       54,
+       3
+      ],
+      "aerei": {
+       "Junyo": {
+        "Zero": 8,
+        "Val": 10
+       }
+      }
+     },
+     {
+      "navi": [
+       "Kongo",
+       "Haruna",
+       "Atago",
+       "Takao",
+       "Myoko",
+       "Maya",
+       "Tone",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       57,
+       4
+      ],
+      "aerei": {
+       "Tone": {
+        "Pete": 1,
+        "Jake": 1
+       },
+       "Kongo": {
+        "Pete": 1
+       },
+       "Haruna": {
+        "Pete": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Hiei",
+       "Kirishima",
+       "Chikuma",
+       "Suzuya",
+       "Chokai",
+       "Nagara",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       64,
+       4
+      ],
+      "aerei": {
+       "Chikuma": {
+        "Pete": 1,
+        "Jake": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Yura",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       50,
+       20
+      ]
+     }
+    ],
+    "basi": {
+     "rabaul": {
+      "Zero": 15,
+      "Betty": 11,
+      "Nell": 9,
+      "Mavis": 2,
+      "Emily": 1
+     },
+     "buin": {
+      "Zero": 9,
+      "Val": 15
+     },
+     "buka": {
+      "Zero": 6,
+      "Kate": 2
+     },
+     "shortland": {
+      "Rufe": 2,
+      "Mavis": 2
+     },
+     "buna": {
+      "Kate": 4
+     },
+     "gasmata": {},
+     "lae": {},
+     "kavieng": {},
+     "truk": {}
+    },
+    "radar": [
+     "rabaul",
+     "lae",
+     "shortland",
+     "gasmata",
+     "buna"
+    ]
+   },
+   "speciali": {
+    "henderson_ripara2": true
+   },
+   "vittoria": {
+    "tipo": "standard",
+    "auto": 250,
+    "min": 200
+   },
+   "obiettivi": {
+    "A": {
+     "difendi": "henderson",
+     "caccia_portaerei": true
+    },
+    "J": {
+     "attacca_base": "henderson",
+     "caccia_portaerei": true
+    }
+   }
+  },
+  {
+   "id": "guadalcanal",
+   "nome": "Guadalcanal",
+   "data": "12-15 novembre 1942",
+   "giorno": 0,
+   "ora": 6,
+   "turni": 79,
+   "meteo": "sparse",
+   "profilo": "sc",
+   "descrizione": "La battaglia navale di Guadalcanal: convogli di rinforzi da entrambe le parti, corazzate nella notte e l'Enterprise che arriva da sud il 13.",
+   "A": {
+    "tf": [
+     {
+      "navi": [
+       "Portland",
+       "San Francisco",
+       "Pensacola",
+       "Atlanta",
+       "Juneau",
+       "Helena",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "PG"
+      ],
+      "hex": [
+       52,
+       22
+      ]
+     },
+     {
+      "navi": [
+       "Enterprise",
+       "Washington",
+       "South Dakota",
+       "Northampton",
+       "San Diego",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       70,
+       43
+      ],
+      "aerei": {
+       "Enterprise": {
+        "Wildcat": 13,
+        "Dauntless": 10,
+        "Avenger": 3
+       }
+      },
+      "entra": 19
+     }
+    ],
+    "basi": {
+     "henderson": {
+      "Wildcat": 9,
+      "Dauntless": 12,
+      "Avenger": 3,
+      "P-39": 1
+     },
+     "espiritu_santo": {
+      "B-17": 12,
+      "Hudson": 2,
+      "Catalina": 6
+     },
+     "nuova_caledonia": {
+      "Catalina": 2
+     },
+     "gili_gili": {
+      "P-40": 8
+     },
+     "port_moresby": {
+      "P-40": 16,
+      "B-26": 20,
+      "B-25": 20,
+      "Hudson": 2,
+      "A-20": 4,
+      "Beaufort": 4,
+      "Beaufighter": 4,
+      "P-38": 5
+     },
+     "australia": {
+      "B-17": 9,
+      "Catalina": 2
+     }
+    },
+    "radar": [
+     "*tutte",
+     "henderson",
+     "espiritu_santo",
+     "gili_gili",
+     "port_moresby",
+     "nuova_caledonia",
+     "australia"
+    ]
+   },
+   "J": {
+    "tf": [
+     {
+      "navi": [
+       "Chokai",
+       "Kinugasa",
+       "Isuzu",
+       "Suzuya",
+       "Maya",
+       "Tenryu",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP",
+       "AP"
+      ],
+      "hex": [
+       37,
+       13
+      ]
+     },
+     {
+      "navi": [
+       "Junyo",
+       "Hiyo",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       50,
+       4
+      ],
+      "aerei": {
+       "Junyo": {
+        "Zero": 7,
+        "Val": 6,
+        "Kate": 3
+       },
+       "Hiyo": {
+        "Zero": 7,
+        "Val": 6,
+        "Kate": 3
+       }
+      }
+     },
+     {
+      "navi": [
+       "Hiei",
+       "Kirishima",
+       "Nagara",
+       "Tone",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       48,
+       10
+      ],
+      "aerei": {
+       "Tone": {
+        "Pete": 1,
+        "Jake": 1
+       },
+       "Kirishima": {
+        "Pete": 1
+       }
+      }
+     },
+     {
+      "navi": [
+       "Kongo",
+       "Haruna",
+       "Atago",
+       "Takao",
+       "Sendai",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD",
+       "DD"
+      ],
+      "hex": [
+       52,
+       6
+      ],
+      "aerei": {
+       "Kongo": {
+        "Pete": 1
+       },
+       "Haruna": {
+        "Jake": 1
+       }
+      }
+     }
+    ],
+    "basi": {
+     "rabaul": {
+      "Zero": 15,
+      "Betty": 20,
+      "Nell": 2,
+      "Mavis": 2,
+      "Emily": 2
+     },
+     "buin": {
+      "Zero": 15,
+      "Val": 9
+     },
+     "buka": {
+      "Kate": 3
+     },
+     "shortland": {
+      "Rufe": 2,
+      "Mavis": 2
+     },
+     "buna": {},
+     "gasmata": {},
+     "lae": {},
+     "kavieng": {},
+     "truk": {}
+    },
+    "radar": [
+     "shortland",
+     "rabaul",
+     "lae",
+     "gasmata"
+    ]
+   },
+   "speciali": {
+    "henderson_ripara2": true,
+    "he_hiei_kirishima": true,
+    "enterprise_rf6": true,
+    "idro_j_meno1": true,
+    "sbarco": {
+     "A": {
+      "hex": [
+       [
+        52,
+        22
+       ]
+      ],
+      "nome": "Henderson"
+     },
+     "J": {
+      "isola": "guadalcanal",
+      "escludi": [
+       [
+        52,
+        22
+       ]
+      ],
+      "nome": "Guadalcanal (non Henderson)"
+     }
+    }
+   },
+   "vittoria": {
+    "tipo": "guadalcanal",
+    "auto": 100,
+    "min": 50,
+    "bonus_sbarco_max": 50,
+    "sbarco_vince_J": 100
+   },
+   "obiettivi": {
+    "A": {
+     "sbarco": "henderson",
+     "difendi": "henderson",
+     "caccia_portaerei": true
+    },
+    "J": {
+     "sbarco": "guadalcanal",
+     "attacca_base": "henderson",
+     "caccia_portaerei": true
+    }
+   }
+  }
+ ],
+ "isole": {
+  "guadalcanal": [
+   [
+    50,
+    23
+   ],
+   [
+    51,
+    22
+   ],
+   [
+    51,
+    23
+   ],
+   [
+    52,
+    22
+   ],
+   [
+    52,
+    24
+   ],
+   [
+    53,
+    22
+   ],
+   [
+    53,
+    24
+   ],
+   [
+    54,
+    23
+   ],
+   [
+    55,
+    23
+   ],
+   [
+    55,
+    24
+   ],
+   [
+    56,
+    22
+   ],
+   [
+    57,
+    22
+   ],
+   [
+    57,
+    23
+   ],
+   [
+    57,
+    25
+   ]
+  ]
+ }
+}
