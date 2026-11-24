@@ -1611,7 +1611,7 @@ func _muovi_af(fid: String, o: Dictionary) -> void:
 ## Prova ad atterrare: il nido deve essere nell'esagono, accettare gli aerei e avere fattore di lancio.
 ## Con il fattore minimo l'AF può aver usato tutto il movimento, con il normale metà, con il massimo deve
 ## essere partita dall'esagono (14.8).
-func _atterra(fid: String, nid: String, passi: int) -> bool:
+func _atterra(fid: String, nid: String, passi: int, altri := false) -> bool:
 	if not st["af"].has(fid) or not st["nidi"].has(nid):
 		return false
 	var af: Dictionary = st["af"][fid]
@@ -1676,6 +1676,7 @@ func _atterra(fid: String, nid: String, passi: int) -> bool:
 			restano.append(resto)
 			q = libero
 		atterrati += q
+		# chi atterra ancora armato usa la tabella d'atterraggio notturno; il -1 vale solo di notte (14.14)
 		var armato: bool = g["arma"] != "" and g["arma"] != "x"
 		var ok := q
 		if notturno or temp or armato:
@@ -1684,7 +1685,7 @@ func _atterra(fid: String, nid: String, passi: int) -> bool:
 				var r := d6()
 				if temp:
 					r -= 1
-				if armato:
+				if armato and notturno:
 					r -= 1
 				if notturno and bool(st["speciali"].get("wasp_notte", false)) and str(st["navi"].get(nid, {}).get("nome", "")) == "Wasp" and g["tipo"] in ["Dauntless", "Avenger"]:
 					r += 2
@@ -1694,10 +1695,13 @@ func _atterra(fid: String, nid: String, passi: int) -> bool:
 				persi += q - ok
 				_perdita(af["lato"], g["tipo"], q - ok, false)
 		if mc < 999 and ok > posto - accettati:
+			# non c'è posto: chi avanza resta in volo e cerca un altro ponte (si perde solo senza carburante)
 			var eccesso: int = ok - maxi(0, posto - accettati)
 			ok -= eccesso
-			persi += eccesso
-			_perdita(af["lato"], g["tipo"], eccesso, true)
+			atterrati -= eccesso
+			var resto2: Dictionary = g.duplicate()
+			resto2["q"] = eccesso
+			restano.append(resto2)
 		_add(nido["jl"], g["tipo"], ok)
 		accettati += ok
 	if not illimitato:
@@ -1714,6 +1718,15 @@ func _atterra(fid: String, nid: String, passi: int) -> bool:
 		st["af"].erase(fid)
 		return true
 	af["gruppi"] = restano
+	# altri ponti amici nello stesso esagono con posto libero
+	if not altri:
+		for n2 in nidi_del_lato(af["lato"]):
+			if n2 == nid or nido_hex(n2) != af_hex(fid) or nido_mc(n2) - nido_aerei(n2) <= 0:
+				continue
+			if _atterra(fid, n2, passi, true):
+				return true
+			if not st["af"].has(fid):
+				return true
 	return false
 
 

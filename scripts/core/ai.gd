@@ -346,12 +346,17 @@ func _preparazione(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void
 			if str(k).ends_with("|") and FTData.aerei[str(k).split("|")[0]]["ruoli"].contains("E"):
 				caccia_pronti += int(nido["pronti"][k])
 		var caccia_voluti: int = int(o["cap"].get(nid, 0)) + (6 if armare else 2)
+		var ora_r: int = int(st["ora"])
+		var finestra_ricerca: bool = (ora_r >= 3 and ora_r <= 7) or (ora_r >= 11 and ora_r <= 13)
 		var ordine := []
 		for tp in nido["prep"].keys():
 			var r2: String = FTData.aerei[tp]["ruoli"]
 			var bomb: bool = r2.contains("B") and not r2.contains("E") and FTEngine.arma_preferita(tp) != ""
 			if bomb and armare:
 				ordine.append([0, tp, FTEngine.arma_preferita(tp, contro_basi)])
+			elif bomb and finestra_ricerca and ESPLORATORI_PRONTI and tp in ["Dauntless", "Kate", "Val", "Avenger", "B-17", "Hudson"]:
+				# un paio di esploratori scarichi pronti per la ricerca dell'alba e del pomeriggio
+				ordine.append([2, tp, ""])
 			elif not bomb and (r2.contains("E") or r2.contains("I")):
 				ordine.append([1, tp, ""])
 			elif not bomb:
@@ -592,7 +597,7 @@ func _ricognizioni(eng, o: Dictionary, contatti: Array) -> void:
 			var af2: Dictionary = st["af"][fid]
 			if str(af2["missione"].get("tipo", "")) == "ricognizione" and af2["casa"] == nid:
 				gia += 1
-		if gia >= (3 if st["navi"].has(nid) else 3):
+		if gia >= (2 if st["navi"].has(nid) else 4):
 			continue
 		var dest: Vector2i = bersagli_dir[i % bersagli_dir.size()]
 		i += 1
@@ -615,6 +620,8 @@ func _ricognizioni(eng, o: Dictionary, contatti: Array) -> void:
 
 
 const RICERCA_ZONE := true
+const UNISCI_CV := true
+const ESPLORATORI_PRONTI := true
 
 func _direzioni_ricerca(eng, contatti: Array) -> Array:
 	var st: Dictionary = eng.st
@@ -953,6 +960,23 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 						o["unisci"] = []
 					o["unisci"].append([capo, t2])
 	piani["capo_flotta"] = capo
+	# la TF di portaerei con più aerei guida le altre
+	var capo_cv := ""
+	var max_aerei := -1
+	for tid in eng.tf_del_lato(lato):
+		var tfc: Dictionary = st["tf"][tid]
+		if tfc.get("fuori", false):
+			continue
+		var na := 0
+		var trasporti := false
+		for nid in tfc["navi"]:
+			if st["navi"][nid]["tipo"] in ["CV", "CVL"] and st["nidi"].has(nid):
+				na += eng.nido_aerei(nid) + 1
+			if st["navi"][nid]["tipo"] in ["AP", "APD"]:
+				trasporti = true
+		if not trasporti and na > max_aerei and na > 0:
+			max_aerei = na
+			capo_cv = tid
 	var bersaglio_base := Vector2i(-999, -999)
 	if obj.has("attacca_base") and st["basi"].has(obj["attacca_base"]):
 		bersaglio_base = eng.vh(st["basi"][obj["attacca_base"]]["hex"])
@@ -980,6 +1004,15 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 		if ha_cv:
 			cv_tf.append(tid)
 			dest = _dest_portaerei(eng, tid, portaerei_nemiche, basi_nemiche, difesa, sbarco, bersaglio_base)
+			# portaerei insieme: gli attacchi si radunano in un esagono, la pattuglia e la contraerea si sommano
+			if UNISCI_CV and capo_cv != "" and capo_cv != tid and st["tf"].has(capo_cv) and not ha_tr:
+				if eng.tf_hex(capo_cv) == h:
+					if st["tf"][capo_cv]["navi"].size() + tf["navi"].size() <= 30:
+						if not o.has("unisci"):
+							o["unisci"] = []
+						o["unisci"].append([capo_cv, tid])
+				else:
+					dest = eng.tf_hex(capo_cv)
 			# Wake: alla fine le portaerei giapponesi devono essere vicine al bordo ovest
 			var ovest: Dictionary = st["speciali"].get("cv_a_ovest", {})
 			if not ovest.is_empty() and lato == "J" and h.x >= int(ovest["colonne"]) - 2:
