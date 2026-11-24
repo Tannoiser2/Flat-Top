@@ -874,6 +874,10 @@ func _applica_ordini(s: String, o: Dictionary) -> void:
 	for nid in cb:
 		if st["nidi"].has(nid) and nido_lato(nid) == s:
 			st["nidi"][nid]["contro_basi"] = bool(cb[nid])
+	var cq: Dictionary = o.get("cap_quota", {})
+	for nid in cq:
+		if st["nidi"].has(nid) and nido_lato(nid) == s and str(cq[nid]) in ["A", "B", "misto"]:
+			st["nidi"][nid]["cap_quota"] = str(cq[nid])
 	var cap: Dictionary = o.get("cap", {})
 	for nid in cap:
 		if st["nidi"].has(nid) and nido_lato(nid) == s:
@@ -1169,18 +1173,30 @@ func _cap_auto(nid: String) -> void:
 		return
 	if bool(nido.get("no_lanci", false)):
 		return
-	# caccia già in pattuglia sopra il nido
-	var in_aria := 0
+	# caccia già in pattuglia sopra il nido, per quota
+	var in_aria := {"A": 0, "B": 0}
 	for fid in st["af"]:
 		var af: Dictionary = st["af"][fid]
 		if af["lato"] == nido["lato"] and str(af["missione"].get("tipo", "")) == "cap" and str(af["missione"].get("nido", "")) == nid:
 			for g in af["gruppi"]:
 				# chi deve atterrare entro un turno conta come già sostituito
 				if int(g["entro"]) > int(st["turno"]) + 1:
-					in_aria += int(g["q"])
-	var manca := vuole - in_aria
-	if manca <= 0:
-		return
+					in_aria[str(af["quota"])] = int(in_aria.get(str(af["quota"]), 0)) + int(g["q"])
+	# quota della pattuglia: alta (contro i picchiatori), bassa (contro gli aerosiluranti) o divisa a metà
+	var cq: String = str(nido.get("cap_quota", "misto"))
+	var voluti := {"A": vuole, "B": 0}
+	if cq == "B":
+		voluti = {"A": 0, "B": vuole}
+	elif cq == "misto":
+		voluti = {"A": (vuole + 1) / 2, "B": vuole / 2}
+	for q in ["A", "B"]:
+		var manca: int = int(voluti[q]) - int(in_aria[q])
+		if manca > 0:
+			_lancia_cap(nid, manca, q)
+
+
+func _lancia_cap(nid: String, manca: int, quota: String) -> void:
+	var nido: Dictionary = st["nidi"][nid]
 	var gruppi := []
 	for k in nido["pronti"].keys():
 		if manca <= 0:
@@ -1195,7 +1211,7 @@ func _cap_auto(nid: String) -> void:
 		manca -= q
 	if gruppi.is_empty():
 		return
-	_forma_af(nido["lato"], {"n": nid, "gruppi": gruppi, "quota": "A", "missione": {"tipo": "cap", "nido": nid}})
+	_forma_af(nido["lato"], {"n": nid, "gruppi": gruppi, "quota": quota, "missione": {"tipo": "cap", "nido": nid}})
 
 
 func _dividi_tf(s: String, d: Dictionary) -> void:

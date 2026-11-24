@@ -985,6 +985,11 @@ func _pannello_nido(nid: String) -> void:
 	hc.add_child(UI.button("-", func(): ord["cap"][nid] = maxi(0, capv - 1); _aggiorna_tutto(), 22, 48))
 	hc.add_child(UI.label("%d caccia" % capv, 22, UI.BRASS_L, UI.font_ui_b))
 	hc.add_child(UI.button("+", func(): ord["cap"][nid] = capv + 1; _aggiorna_tutto(), 22, 48))
+	if not ord.has("cap_quota"):
+		ord["cap_quota"] = {}
+	var cqv: String = str(ord["cap_quota"].get(nid, nido.get("cap_quota", "misto")))
+	panel_box.add_child(UI.wrap("Quota della pattuglia: in alto ferma i picchiatori, in basso gli aerosiluranti.", 17, UI.MUTED, 500))
+	panel_box.add_child(_scelta([["A", "Alta"], ["misto", "Metà e metà"], ["B", "Bassa"]], cqv, func(v): ord["cap_quota"][nid] = v; _aggiorna_tutto(), 150))
 	# caselle
 	_box_aerei(nid, "pronti", "Pronti al decollo")
 	_box_aerei(nid, "prep", "In preparazione")

@@ -1197,7 +1197,10 @@ static func superficie(eng, h: Vector2i) -> void:
 		for tid in tfs[s]:
 			contegni.append(str(st["tf"][tid].get("contegno", "evita")))
 			for nid in st["tf"][tid]["navi"]:
-				forza += _art(st["navi"][nid])
+				var nf: Dictionary = st["navi"][nid]
+				# conta solo chi ha ancora munizioni
+				if (not nf.get("mun_usata", false)) if nf["tipo"] in ["DD", "APD"] else int(nf["mun"]) > 0:
+					forza += _art(nf)
 		for tid in tfs[eng.nemico(s)]:
 			for nid in st["tf"][tid]["navi"]:
 				forza_n += _art(st["navi"][nid])
@@ -1240,6 +1243,10 @@ static func superficie(eng, h: Vector2i) -> void:
 			pos[d["id"]] = p
 		dadi[s] = clampi(int(r2.get(s, {}).get("dado", 1)), 1, 6)
 	var bht: int = dadi["A"] + dadi["J"]
+	# chi combatte in linea o con i siluri non può bombardare la costa in questo turno (19.9)
+	for nid in pos:
+		if pos[nid] in ["art", "silu"]:
+			st["navi"][nid]["sup_turno"] = int(st["turno"])
 	var rep := ["dadi %d e %d, BHT %d" % [dadi["A"], dadi["J"], bht]]
 	for s in ["A", "J"]:
 		for tid in tfs[s]:
@@ -1515,6 +1522,8 @@ static func bombardamento(eng, h: Vector2i, s: String) -> void:
 		for nid in tf["navi"]:
 			var n: Dictionary = st["navi"][nid]
 			if n["affondata"] or not n["tipo"] in ["BB", "CAV", "CA", "CL"] or int(n["mun"]) < 8:
+				continue
+			if int(n.get("sup_turno", -1)) == int(st["turno"]):
 				continue
 			var art: int = int(n["art"])
 			if n.get("he", false):
