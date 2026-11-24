@@ -5,5 +5,9 @@
   "online": true,
   "sezione": "conversione",
   "ordine": 214,
-  "generi": ["Wargame", "Storici"]
+  "generi": [
+    "Wargame",
+    "Storici"
+  ],
+  "bgg": 2529
 }
