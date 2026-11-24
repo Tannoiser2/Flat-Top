@@ -276,6 +276,41 @@ func _preparazione(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void
 		if lib <= 0:
 			continue
 		var contro_basi: bool = bool(o["contro_basi"].get(nid, false))
+		# basi sul tavolo: di notte gli aerei si disperdono (contro i bombardamenti navali ne perde uno ogni due
+		# colpi invece di uno per colpo) e all'alba tornano in preparazione
+		if st["basi"].has(nid) and not st["basi"][nid]["fuori"]:
+			var sera: bool = eng.notte() or int(st["ora"]) >= 18
+			if sera:
+				for tp in nido["pronti"].keys():
+					if lib <= 0:
+						break
+					var qp: int = mini(lib, int(nido["pronti"][tp]))
+					if qp > 0 and not _cap_in_uso(eng, nid):
+						o["prep"].append({"n": nid, "da": "pronti", "a": "prep", "tipo": str(tp).split("|")[0], "q": qp, "arma": str(tp).split("|")[1] if str(tp).contains("|") else ""})
+						lib -= qp
+				for tp in nido["prep"].keys():
+					if lib <= 0:
+						break
+					var qd: int = mini(lib, int(nido["prep"][tp]))
+					if qd > 0:
+						o["prep"].append({"n": nid, "da": "prep", "a": "disp", "tipo": tp, "q": qd})
+						lib -= qd
+				for tp in nido["jl"].keys():
+					if lib <= 0:
+						break
+					var qj: int = mini(lib, int(nido["jl"][tp]))
+					if qj > 0:
+						o["prep"].append({"n": nid, "da": "jl", "a": "prep", "tipo": tp, "q": qj})
+						lib -= qj
+				continue
+			elif int(st["ora"]) >= 4:
+				for tp in nido["disp"].keys():
+					if lib <= 0:
+						break
+					var qr: int = mini(lib, int(nido["disp"][tp]))
+					if qr > 0:
+						o["prep"].append({"n": nid, "da": "disp", "a": "prep", "tipo": tp, "q": qr})
+						lib -= qr
 		# bombardieri a bordo e loro raggio
 		var tipi_b := []
 		for box in ["prep", "jl", "pronti"]:
@@ -285,6 +320,10 @@ func _preparazione(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void
 				if r.contains("B") and not r.contains("E") and FTEngine.arma_preferita(tp) != "" and not tp in tipi_b:
 					tipi_b.append(tp)
 		var armare := false
+		# contro un nemico che attacca soprattutto con i siluri, gli aerei in preparazione raddoppiano i suoi
+		# colpi: meglio averli già pronti (21.6)
+		if _quota_cap(eng) == "B" and not tipi_b.is_empty():
+			armare = true
 		if not tipi_b.is_empty() and not notte_presto:
 			var rag := 6
 			for tpb in tipi_b:
@@ -336,6 +375,10 @@ func _preparazione(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void
 			if q2 > 0:
 				o["prep"].append({"n": nid, "da": "jl", "a": "prep", "tipo": tp, "q": q2})
 				lib -= q2
+
+
+func _cap_in_uso(_eng, _nid: String) -> bool:
+	return false
 
 
 func _quota_cap(eng) -> String:
@@ -806,6 +849,11 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 		if ha_cv:
 			cv_tf.append(tid)
 			dest = _dest_portaerei(eng, tid, portaerei_nemiche, basi_nemiche, difesa, sbarco, bersaglio_base)
+			# Wake: alla fine le portaerei giapponesi devono essere vicine al bordo ovest
+			var ovest: Dictionary = st["speciali"].get("cv_a_ovest", {})
+			if not ovest.is_empty() and lato == "J" and h.x >= int(ovest["colonne"]) - 2:
+				if int(st["turni"]) - int(st["turno"]) <= (h.x - int(ovest["colonne"]) + 2) / maxi(1, eng.tf_mf(tid)) + 8:
+					dest = _mare_vicino(Vector2i(int(ovest["colonne"]) - 4, h.y))
 		elif ha_tr and not sbarco.is_empty():
 			if carichi > 0:
 				var best: Vector2i = sbarco[0]
@@ -899,10 +947,21 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 				preda = Vector2i(-999, -999)
 			# guardia notturna alla base da difendere contro i bombardamenti navali e gli sbarchi
 			var guardia := false
+			var ritira := false
 			var nem_obj: Dictionary = FTData.scenario(st["scen"]).get("obiettivi", {}).get(eng.nemico(lato), {})
 			if difesa.x > -100 and (str(nem_obj.get("attacca_base", "")) == str(obj.get("difendi", "")) or nem_obj.has("sbarco")) and _ha_munizioni(eng, tid):
 				guardia = notte_vicina and (preda.x < -100 or pd > 3)
-			if minaccia.x > -100:
+				# di guardia solo se non ci sono in giro flotte da guerra nemiche più forti
+				for c in contatti:
+					if c["tipo"] == "tf" and c["eta"] <= 4 and FTData.dist(c["hex"], difesa) <= 12:
+						var magg2: int = int(c["info"].get("maggiori", 0))
+						if magg2 > miei_magg or (magg2 == 0 and c["info"].get("ha_maggiori", false) and miei_magg < 3):
+							guardia = false
+							if FTData.dist(h, difesa) < 6 and minaccia.x < -100:
+								ritira = true
+								contegno = "evita"
+								dest = _lontano(h, c["hex"], 3)
+			if minaccia.x > -100 or ritira:
 				pass
 			elif guardia:
 				dest = difesa if FTData.navigabile(difesa) else _mare_vicino(difesa)

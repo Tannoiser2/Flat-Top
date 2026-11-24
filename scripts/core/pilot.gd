@@ -34,9 +34,10 @@ static func ordini_af(eng, fid: String) -> Dictionary:
 				if nh == h:
 					return {"rotta": [], "quota": "B", "atterra": nid}
 				return _verso(eng, fid, nh, "B", false, nid)
+			# la pattuglia resta alla quota a cui è stata lanciata (alta contro i picchiatori, bassa contro i siluri)
 			if nh != h:
-				return _verso(eng, fid, nh, "A", false, "")
-			return {"rotta": [], "quota": "A"}
+				return _verso(eng, fid, nh, af["quota"], false, "")
+			return {"rotta": [], "quota": af["quota"]}
 		"attacco":
 			if not eng._af_armata(af) or margine < turni_ritorno + 1:
 				af["missione"] = {"tipo": "rientro", "da": "attacco"}
