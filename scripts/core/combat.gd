@@ -845,10 +845,10 @@ static func ai_bersagli(eng, _s: String, req: Dictionary) -> Dictionary:
 	for n in req["navi"]:
 		var nn: Dictionary = st["navi"][n["id"]]
 		var pri := priorita_nave(nn["tipo"])
-		if str(miss.get("priorita", "")) == "trasporti" and nn["tipo"] in ["AP", "APD"]:
-			pri = -1
 		if nn["tf"] == pref:
 			pri -= 10
+		if str(miss.get("priorita", "")) == "trasporti" and nn["tipo"] in ["AP", "APD"] and int(nn.get("carico", 0)) > 0:
+			pri = -20
 		navi.append([pri, -int(nn["danno"]) + int(nn["hits"]), n["id"]])
 	navi.sort()
 	if navi.is_empty():

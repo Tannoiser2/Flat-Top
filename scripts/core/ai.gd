@@ -34,7 +34,7 @@ func decide(eng, s: String, req: Dictionary) -> Dictionary:
 		"ordini":
 			return ordini(eng)
 		"aria":
-			return {}
+			return aria(eng)
 	return {}
 
 
@@ -91,6 +91,35 @@ func schieramento(eng, req: Dictionary) -> Dictionary:
 	return {"pos": pos, "entra": out_entra}
 
 
+## Movimento aereo: le formazioni d'attacco dirette allo stesso bersaglio che si trovano nello stesso
+## esagono e alla stessa quota si uniscono (la contraerea spara contro ogni formazione: meglio una grossa).
+func aria(eng) -> Dictionary:
+	var st: Dictionary = eng.st
+	var unisci := []
+	var usate := {}
+	var ids: Array = eng.af_del_lato(lato)
+	ids.sort()
+	for i in ids.size():
+		var a: String = ids[i]
+		if usate.has(a) or st["af"][a].get("fuori_mappa", false):
+			continue
+		var ma: Dictionary = st["af"][a]["missione"]
+		if str(ma.get("tipo", "")) != "attacco":
+			continue
+		for j in range(i + 1, ids.size()):
+			var b: String = ids[j]
+			if usate.has(b) or st["af"][b].get("fuori_mappa", false):
+				continue
+			var mb: Dictionary = st["af"][b]["missione"]
+			if str(mb.get("tipo", "")) != "attacco" or eng.af_hex(a) != eng.af_hex(b) or st["af"][a]["quota"] != st["af"][b]["quota"]:
+				continue
+			if str(ma.get("bersaglio", ma.get("bersaglio_base", ""))) != str(mb.get("bersaglio", mb.get("bersaglio_base", ""))):
+				continue
+			unisci.append([a, b])
+			usate[b] = true
+	return {"_unisci_af": unisci}
+
+
 func ordini(eng) -> Dictionary:
 	var st: Dictionary = eng.st
 	var o := {"lanci": [], "rotte": {}, "cap": {}, "contegno": {}, "ancora": {}, "pedina": {}, "auto": {}, "contro_basi": {}}
@@ -111,10 +140,11 @@ func ordini(eng) -> Dictionary:
 		if c["tipo"] == "tf":
 			navi_nemiche_note = true
 	for nid in eng.nidi_del_lato(lato):
-		o["auto"][nid] = true
+		o["auto"][nid] = false
 		o["contro_basi"][nid] = obj.has("attacca_base") and not navi_nemiche_note and st["navi"].has(nid) == false
 		if obj.has("attacca_base") and str(obj["attacca_base"]) == "rabaul":
 			o["contro_basi"][nid] = not navi_nemiche_note
+	o["prep"] = []
 	# ---- pattuglia aerea
 	var minaccia := _minaccia_aerea(eng, contatti)
 	for nid in eng.nidi_del_lato(lato):
@@ -122,10 +152,13 @@ func ordini(eng) -> Dictionary:
 		var cap := 0
 		if not notte and not notte_prossima and caccia > 0:
 			if st["navi"].has(nid):
-				cap = clampi(int(caccia * (0.5 if minaccia else 0.3)), 2 if caccia >= 2 else caccia, 12)
+				cap = clampi(int(caccia * ((0.6 if lato == "A" else 0.5) if minaccia else 0.3)), 2 if caccia >= 2 else caccia, 12)
 			elif not st["basi"][nid]["fuori"] and _base_esposta(eng, nid, contatti):
 				cap = clampi(int(caccia * 0.4), 0, 8)
 		o["cap"][nid] = cap
+	# ---- preparazione degli aerei: i bombardieri si armano solo quando c'è qualcosa da colpire (gli aerei
+	# pronti sul ponte raddoppiano i colpi nemici), i caccia salgono per la pattuglia e la scorta
+	_preparazione(eng, o, contatti, obj)
 	# ---- ricognizione
 	_ricognizioni(eng, o, contatti)
 	# ---- attacchi
@@ -222,6 +255,78 @@ func _base_esposta(eng, bid: String, contatti: Array) -> bool:
 	return false
 
 
+func _preparazione(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
+	var st: Dictionary = eng.st
+	var notte_presto := FTData.is_notte(int(st["ora"]) % 24 + 1) and FTData.is_notte((int(st["ora"]) + 2) % 24 + 1)
+	for nid in eng.nidi_del_lato(lato):
+		var nido: Dictionary = st["nidi"][nid]
+		var h: Vector2i = eng.nido_hex(nid)
+		if h.x < -100:
+			continue
+		var lib: int = eng.nido_rf(nid) - int(nido["rf_usato"])
+		if lib <= 0:
+			continue
+		var contro_basi: bool = bool(o["contro_basi"].get(nid, false))
+		# bombardieri a bordo e loro raggio
+		var tipi_b := []
+		for box in ["prep", "jl", "pronti"]:
+			for k in nido[box]:
+				var tp: String = str(k).split("|")[0]
+				var r: String = FTData.aerei[tp]["ruoli"]
+				if r.contains("B") and not r.contains("E") and FTEngine.arma_preferita(tp) != "" and not tp in tipi_b:
+					tipi_b.append(tp)
+		var armare := false
+		if not tipi_b.is_empty() and not notte_presto:
+			var rag := PILOT.raggio(tipi_b, true) + 6
+			for c in contatti:
+				if c["tipo"] == "tf" and c["eta"] <= 3 and FTData.dist(h, c["hex"]) <= rag:
+					armare = true
+			if obj.has("attacca_base") and st["basi"].has(str(obj["attacca_base"])) and st["basi"][str(obj["attacca_base"])]["lato"] != lato:
+				if FTData.dist(h, eng.vh(st["basi"][str(obj["attacca_base"])]["hex"])) <= rag:
+					armare = true
+			# basi lontane dal fronte (fuori mappa): armano sempre, non rischiano attacchi
+			if st["basi"].has(nid) and st["basi"][nid]["fuori"]:
+				armare = true
+		# caccia da tenere pronti: pattuglia voluta più una scorta se si prepara un attacco
+		var caccia_pronti := 0
+		for k in nido["pronti"]:
+			if str(k).ends_with("|") and FTData.aerei[str(k).split("|")[0]]["ruoli"].contains("E"):
+				caccia_pronti += int(nido["pronti"][k])
+		var caccia_voluti: int = int(o["cap"].get(nid, 0)) + (6 if armare else 2)
+		var ordine := []
+		for tp in nido["prep"].keys():
+			var r2: String = FTData.aerei[tp]["ruoli"]
+			var bomb: bool = r2.contains("B") and not r2.contains("E") and FTEngine.arma_preferita(tp) != ""
+			if bomb and armare:
+				ordine.append([0, tp, FTEngine.arma_preferita(tp, contro_basi)])
+			elif not bomb and (r2.contains("E") or r2.contains("I")):
+				ordine.append([1, tp, ""])
+			elif not bomb:
+				# esploratori (idrovolanti, bombardieri pesanti usati per cercare): pronti scarichi
+				ordine.append([2, tp, ""])
+		ordine.sort()
+		for it in ordine:
+			if lib <= 0:
+				break
+			var q: int = mini(lib, int(nido["prep"][it[1]]))
+			if it[0] == 1:
+				q = mini(q, maxi(0, caccia_voluti - caccia_pronti))
+				caccia_pronti += q
+			elif it[0] == 2:
+				q = mini(q, 2)
+			if q <= 0:
+				continue
+			o["prep"].append({"n": nid, "da": "prep", "a": "pronti", "tipo": it[1], "q": q, "arma": it[2]})
+			lib -= q
+		for tp in nido["jl"].keys():
+			if lib <= 0:
+				break
+			var q2: int = mini(lib, int(nido["jl"][tp]))
+			if q2 > 0:
+				o["prep"].append({"n": nid, "da": "jl", "a": "prep", "tipo": tp, "q": q2})
+				lib -= q2
+
+
 func _caccia_nido(eng, nid: String) -> int:
 	var nido: Dictionary = eng.st["nidi"][nid]
 	var t := 0
@@ -284,7 +389,8 @@ func _ricognizioni(eng, o: Dictionary, contatti: Array) -> void:
 	var st: Dictionary = eng.st
 	var ora: int = st["ora"]
 	# di notte si cerca poco: si preparano le partenze per l'alba
-	var giorno_presto := ora >= 4 and ora <= 16
+	# ricerca all'alba (i ricognitori partono prima della luce) e nel primo pomeriggio; di notte quasi mai
+	var giorno_presto := (ora >= 4 and ora <= 8) or (ora >= 12 and ora <= 14)
 	if not giorno_presto:
 		return
 	var in_volo := 0
@@ -482,7 +588,16 @@ func _attacchi(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 		for k in armati:
 			tipi.append(k.split("|")[0])
 			tot_arm += armati[k]
-		# serve una forza minima: non si sprecano i bombardieri a gocce
+		# attacchi grossi e concentrati: si aspetta che sia armata la maggior parte dei bombardieri
+		var tot_bomb := tot_arm
+		for box in ["prep", "jl"]:
+			for k2 in nido[box]:
+				var r3: String = FTData.aerei[str(k2).split("|")[0]]["ruoli"]
+				if r3.contains("B") and not r3.contains("E") and FTEngine.arma_preferita(str(k2).split("|")[0]) != "":
+					tot_bomb += int(nido[box][k2])
+		var soglia: int = clampi(ceili(tot_bomb * 0.7), 4, 10) if st["navi"].has(nid) else clampi(ceili(tot_bomb * 0.6), 5, 12)
+		if tot_arm < mini(soglia, tot_bomb):
+			continue
 		if tot_arm < (4 if st["navi"].has(nid) else 5):
 			continue
 		var rag := PILOT.raggio(tipi, true)
