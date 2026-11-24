@@ -173,6 +173,9 @@ func ordini(eng) -> Dictionary:
 	# ---- attacchi
 	if not notte:
 		_attacchi(eng, o, contatti, obj)
+	# ---- bombardieri terrestri troppo lontani: si spostano su una base più avanzata
+	if not notte:
+		_trasferimenti(eng, o, contatti, obj)
 	# ---- movimento delle TF
 	_movimenti(eng, o, contatti, obj)
 	# ---- pedinamenti: le AF che vedono portaerei nemiche le seguono
@@ -377,6 +380,64 @@ func _preparazione(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void
 				lib -= q2
 
 
+func _trasferimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
+	var st: Dictionary = eng.st
+	# il punto da colpire: la base obiettivo, altrimenti le navi nemiche viste di recente
+	var mira := Vector2i(-999, -999)
+	if obj.has("attacca_base") and st["basi"].has(str(obj["attacca_base"])):
+		mira = eng.vh(st["basi"][str(obj["attacca_base"])]["hex"])
+	else:
+		for c in contatti:
+			if c["tipo"] == "tf" and c["eta"] <= 4:
+				mira = c["hex"]
+				break
+	if mira.x < -100:
+		return
+	for nid in eng.nidi_del_lato(lato):
+		if not st["basi"].has(nid) or st["basi"][nid]["fuori"]:
+			continue
+		var h: Vector2i = eng.nido_hex(nid)
+		var d0 := FTData.dist(h, mira)
+		var nido: Dictionary = st["nidi"][nid]
+		var gruppi := []
+		var tot := 0
+		for k in nido["pronti"]:
+			var tp: String = str(k).split("|")[0]
+			var r: String = FTData.aerei[tp]["ruoli"]
+			if not r.contains("B") or r.contains("E") or FTData.aerei[tp]["classe"] in ["FL", "FH"]:
+				continue
+			if PILOT.raggio([tp], true) >= d0:
+				continue
+			# senza le bombe arrivano più lontano: il trasferimento si fa scarichi solo se già armati non basta
+			gruppi.append({"tipo": tp, "q": int(nido["pronti"][k]), "arma": str(k).split("|")[1] if str(k).contains("|") else ""})
+			tot += int(nido["pronti"][k])
+		if tot < 4:
+			continue
+		# base amica più vicina al bersaglio, che li accetti, in portata del volo di trasferimento
+		var best := ""
+		var bd := d0
+		for b2 in eng.nidi_del_lato(lato):
+			if b2 == nid or not st["basi"].has(b2) or st["basi"][b2]["fuori"] or int(eng.nido_lf(b2)[0]) <= 0:
+				continue
+			var h2: Vector2i = eng.nido_hex(b2)
+			var ok := true
+			for g in gruppi:
+				if not eng.nido_accetta(b2, g["tipo"]) or PILOT.raggio([g["tipo"]], true) < FTData.dist(h2, mira) + 1:
+					ok = false
+				var mf: int = int(FTData.aerei[g["tipo"]]["mf"])
+				var rf: int = int(FTData.aerei[g["tipo"]]["rf"])
+				if FTData.dist(h, h2) > (rf - 2) * (mf - 1):
+					ok = false
+			if not ok or eng.nido_mc(b2) - eng.nido_aerei(b2) < tot:
+				continue
+			var d2 := FTData.dist(h2, mira)
+			if d2 < bd:
+				bd = d2
+				best = b2
+		if best != "":
+			o["lanci"].append({"n": nid, "gruppi": gruppi, "quota": "A", "missione": {"tipo": "trasferimento", "nido": best}})
+
+
 func _cap_in_uso(_eng, _nid: String) -> bool:
 	return false
 
@@ -531,7 +592,7 @@ func _ricognizioni(eng, o: Dictionary, contatti: Array) -> void:
 			var af2: Dictionary = st["af"][fid]
 			if str(af2["missione"].get("tipo", "")) == "ricognizione" and af2["casa"] == nid:
 				gia += 1
-		if gia >= (2 if st["navi"].has(nid) else 3):
+		if gia >= (3 if st["navi"].has(nid) else 3):
 			continue
 		var dest: Vector2i = bersagli_dir[i % bersagli_dir.size()]
 		i += 1
@@ -552,6 +613,8 @@ func _ricognizioni(eng, o: Dictionary, contatti: Array) -> void:
 			"missione": {"tipo": "ricognizione", "verso": [dest.x, dest.y]}})
 		in_volo += 1
 
+
+const RICERCA_ZONE := true
 
 func _direzioni_ricerca(eng, contatti: Array) -> Array:
 	var st: Dictionary = eng.st
@@ -602,6 +665,27 @@ func _direzioni_ricerca(eng, contatti: Array) -> Array:
 		p.x = clampi(p.x, 0, 79)
 		p.y = clampi(p.y, 0, 43)
 		punti.append(p)
+	# nei primi due giorni si cerca anche dove lo scenario dice che il nemico parte (lo sanno entrambi)
+	if turno < 48 and RICERCA_ZONE:
+		var sc := FTData.scenario(st["scen"])
+		var zone := []
+		for tdef in sc.get(eng.nemico(lato), {}).get("tf", []):
+			if not tdef.has("zona"):
+				continue
+			var z: Array = eng.zona(tdef["zona"])
+			if z.is_empty():
+				continue
+			var cz := Vector2.ZERO
+			for zh in z:
+				cz += Vector2(zh)
+			cz /= z.size()
+			var pz := Vector2i(roundi(cz.x), roundi(cz.y))
+			# la zona si sposta col tempo: verso il punto in cui il nemico sarà diretto (la nostra metà)
+			var spost: float = clampf(float(turno) / 24.0, 0.0, 1.0) * 0.4
+			pz = Vector2i(roundi(lerpf(pz.x, mio.x, spost)), roundi(lerpf(pz.y, mio.y, spost)))
+			if not pz in zone:
+				zone.append(pz)
+		punti = zone + punti
 	# alterna: un raggio verso il nemico e uno del giro d'orizzonte
 	var out := []
 	var n := maxi(punti.size(), giro.size())
@@ -822,6 +906,53 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 					escl = true
 			if not escl:
 				sbarco.append(hh)
+	# ---- flotta da battaglia: se il nemico punta sulla base da difendere (bombardamenti, sbarchi), le corazzate
+	# e gli incrociatori pesanti lasciano le portaerei e si riuniscono alle altre navi da guerra in una sola forza
+	var nem_obj0: Dictionary = FTData.scenario(st["scen"]).get("obiettivi", {}).get(eng.nemico(lato), {})
+	var minacciata: bool = difesa.x > -100 and str(nem_obj0.get("attacca_base", "")) == str(obj.get("difendi", "")) and not nem_obj0.has("sbarco")
+	var capo := ""
+	if minacciata:
+		if not piani.get("flotta_staccata", false):
+			piani["flotta_staccata"] = true
+			if not o.has("dividi"):
+				o["dividi"] = []
+			for tid in eng.tf_del_lato(lato):
+				var tf0: Dictionary = st["tf"][tid]
+				var ha_cv0 := false
+				var pesanti := []
+				for nid in tf0["navi"]:
+					var n0: Dictionary = st["navi"][nid]
+					if n0["tipo"] in ["CV", "CVL"]:
+						ha_cv0 = true
+					elif n0["tipo"] in ["BB", "BC"] or (n0["tipo"] == "CA" and pesanti.size() < 3):
+						pesanti.append(nid)
+				if ha_cv0 and not pesanti.is_empty() and tf0["navi"].size() - pesanti.size() >= 4:
+					o["dividi"].append({"tf": tid, "navi": pesanti})
+		# la TF da battaglia più forte guida, le altre la raggiungono e si uniscono
+		var forze := []
+		for tid in eng.tf_del_lato(lato):
+			var tf1: Dictionary = st["tf"][tid]
+			if tf1.get("fuori", false) or tf1["ancorata"]:
+				continue
+			var art := 0
+			var ok := true
+			for nid in tf1["navi"]:
+				var n1: Dictionary = st["navi"][nid]
+				if n1["tipo"] in ["CV", "CVL", "AP", "APD", "AO"]:
+					ok = false
+				art += int(n1["art"])
+			if ok and art >= 8:
+				forze.append([art, tid])
+		forze.sort()
+		if not forze.is_empty():
+			capo = forze[forze.size() - 1][1]
+			for f in forze:
+				var t2: String = f[1]
+				if t2 != capo and eng.tf_hex(t2) == eng.tf_hex(capo):
+					if not o.has("unisci"):
+						o["unisci"] = []
+					o["unisci"].append([capo, t2])
+	piani["capo_flotta"] = capo
 	var bersaglio_base := Vector2i(-999, -999)
 	if obj.has("attacca_base") and st["basi"].has(obj["attacca_base"]):
 		bersaglio_base = eng.vh(st["basi"][obj["attacca_base"]]["hex"])
@@ -873,7 +1004,9 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 							minacciato = true
 					var vit: Dictionary = FTData.scenario(st["scen"]).get("vittoria", {})
 					var deficit: int = int(st["lati"][eng.nemico(lato)]["vp"]) - int(st["lati"][lato]["vp"])
-					var fretta: bool = int(st["turno"]) >= int(st["turni"]) * 0.35 or deficit >= int(vit.get("auto", 200)) / 2
+					# corsa allo sbarco: se sbarca anche il nemico non si può aspettare
+					var corsa: bool = FTData.scenario(st["scen"]).get("obiettivi", {}).get(eng.nemico(lato), {}).has("sbarco")
+					var fretta: bool = corsa or int(st["turno"]) >= int(st["turni"]) * 0.35 or deficit >= int(vit.get("auto", 200)) / 2
 					if minacciato and not fretta:
 						dest = h if FTData.dist(h, best) >= 11 else _lontano(h, best, 2)
 				# di giorno il convoglio non entra nel raggio degli aerei delle basi nemiche: aspetta il
@@ -961,8 +1094,13 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 								ritira = true
 								contegno = "evita"
 								dest = _lontano(h, c["hex"], 3)
+			var capo2: String = str(piani.get("capo_flotta", ""))
 			if minaccia.x > -100 or ritira:
 				pass
+			elif capo2 != "" and capo2 != tid and st["tf"].has(capo2) and eng.tf_hex(capo2) != h and not guardia:
+				# raggiunge la flotta da battaglia
+				dest = eng.tf_hex(capo2)
+				contegno = "evita"
 			elif guardia:
 				dest = difesa if FTData.navigabile(difesa) else _mare_vicino(difesa)
 				contegno = "attacca"
