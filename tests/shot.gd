@@ -44,8 +44,16 @@ func _run(w: int, h: int, scen: String) -> void:
 	var tids = g.eng.tf_del_lato("A")
 	g._seleziona("tf", tids[0])
 	var h0: Vector2i = g.eng.tf_hex(tids[0])
-	g._on_hex(h0 + Vector2i(-2, -2))
+	g._on_hex(h0 + Vector2i(-9, -6))
 	await _snap("05_tf_rotta")
+	g.map.adatta()
+	g.map.queue_redraw()
+	await _snap("05b_zoom_fuori")
+	g.map.centra_su(h0, 1.6)
+	g.map.queue_redraw()
+	await _snap("05c_zoom_dentro")
+	g._indietro()
+	await _snap("05d_elenco")
 	# portaerei
 	var nidi = g.eng.nidi_del_lato("A")
 	var cv = ""

@@ -712,6 +712,18 @@ func _applica_ordini(s: String, o: Dictionary) -> void:
 	for tid in most:
 		if st["tf"].has(tid) and st["tf"][tid]["lato"] == s:
 			st["tf"][tid]["in_vista"] = bool(most[tid])
+	var dests: Dictionary = o.get("destinazioni", {})
+	for tid in dests:
+		if st["tf"].has(tid) and st["tf"][tid]["lato"] == s:
+			var dd = dests[tid]
+			if dd == null or (dd is Array and dd.is_empty()):
+				st["tf"][tid].erase("dest")
+			else:
+				st["tf"][tid]["dest"] = [int(dd[0]), int(dd[1])]
+	var miss: Dictionary = o.get("_missioni", {})
+	for fid in miss:
+		if st["af"].has(fid) and st["af"][fid]["lato"] == s:
+			st["af"][fid]["missione"] = miss[fid].duplicate(true)
 	var rotte: Dictionary = o.get("rotte", {})
 	for tid in st["tf"]:
 		var tf: Dictionary = st["tf"][tid]
@@ -721,6 +733,11 @@ func _applica_ordini(s: String, o: Dictionary) -> void:
 		if rotte.has(tid):
 			for h in rotte[tid]:
 				tf["rotta"].append([int(h[0]), int(h[1])])
+		elif tf.has("dest") and not tf["ancorata"]:
+			# destinazione di più turni: la TF prosegue da sola
+			var path := FTData.percorso(tf_hex(tid), vh(tf["dest"]), true)
+			for h in path.slice(0, tf_mf(tid)):
+				tf["rotta"].append([h.x, h.y])
 	var ped: Dictionary = o.get("pedina", {})
 	st["lati"][s]["pedina"] = ped.duplicate()
 
@@ -1105,6 +1122,11 @@ func _movimento_tf(ordini: Dictionary) -> void:
 				mf[tid] = passo + 1
 		if mosse:
 			_osserva_tutto("")
+	for tid in st["tf"]:
+		var tf3: Dictionary = st["tf"][tid]
+		if tf3.has("dest") and tf_hex(tid) == vh(tf3["dest"]):
+			tf3.erase("dest")
+			add_log(tf3["lato"], "La TF %d è arrivata a destinazione." % tf3["num"], "minore")
 	# chi pedina raggiunge la TF pedinata (se ce la fa con il suo movimento)
 	for chi in pedinate:
 		if not pedinate[chi]["ok"]:

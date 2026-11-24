@@ -283,9 +283,18 @@ func _aggiorna_tutto() -> void:
 func _aggiorna_mappa() -> void:
 	map.lato = lato_vista
 	var rotte := {}
+	map.passi_turno = {}
 	if req_corrente.get("k", "") == "ordini":
-		for tid in ord.get("rotte", {}):
-			rotte[tid] = ord["rotte"][tid]
+		for tid in ord.get("percorsi", {}):
+			rotte[tid] = ord["percorsi"][tid]
+			if eng.st["tf"].has(tid):
+				map.passi_turno[tid] = eng.tf_mf(tid)
+	else:
+		for tid in eng.tf_del_lato(lato_vista):
+			var tf: Dictionary = eng.st["tf"][tid]
+			if tf.has("dest") and not tf.get("fuori", false):
+				rotte[tid] = FTData.percorso(eng.tf_hex(tid), FTEngine.vh(tf["dest"]), true)
+				map.passi_turno[tid] = eng.tf_mf(tid)
 	map.rotte = rotte
 	map.rotte_af = {}
 	if req_corrente.get("k", "") == "aria":
@@ -369,7 +378,15 @@ func chiedi(s: String, req: Dictionary) -> Dictionary:
 	lancio = {}
 	riservati = {}
 	if req["k"] == "ordini":
-		ord = {"lanci": [], "rotte": {}, "cap": {}, "auto": {}, "contegno": {}, "ancora": {}, "mostra": {}, "pedina": {}, "dividi": [], "unisci": [], "prep": []}
+		ord = {"lanci": [], "rotte": {}, "cap": {}, "auto": {}, "contegno": {}, "ancora": {}, "mostra": {}, "pedina": {}, "dividi": [], "unisci": [], "prep": [],
+			"destinazioni": {}, "percorsi": {}, "_missioni": {}}
+		# le TF con una destinazione la riprendono da dove sono arrivate
+		for tid in eng.tf_del_lato(s):
+			var tf: Dictionary = eng.st["tf"][tid]
+			if tf.has("dest") and not tf.get("fuori", false):
+				var path := FTData.percorso(eng.tf_hex(tid), FTEngine.vh(tf["dest"]), true)
+				if not path.is_empty():
+					_imposta_percorso(tid, path)
 		for nid in eng.nidi_del_lato(s):
 			ord["cap"][nid] = int(eng.st["nidi"][nid].get("cap", 0))
 			ord["auto"][nid] = bool(eng.st["nidi"][nid].get("auto", true))
@@ -445,6 +462,12 @@ func _pannello() -> void:
 	if k == "":
 		_pannello_attesa()
 		return
+	if lancio.is_empty():
+		var txt := "Ordini pronti: passa al movimento" if k == "ordini" else "Fine del movimento aereo"
+		var bb := UI.big_button(txt, _conferma, 500)
+		azione_box.add_child(bb)
+		var aiuto := "Quando hai dato gli ordini che ti servono (anche nessuno) premi qui: il turno prosegue." if k == "ordini" else "Le formazioni con una missione volano da sole: premi qui per farle muovere e passare al combattimento."
+		azione_box.add_child(UI.wrap(aiuto, 17, UI.MUTED, 500))
 	if not lancio.is_empty():
 		_pannello_lancio()
 		return
@@ -456,6 +479,8 @@ func _pannello() -> void:
 				_pannello_nido(sel["id"])
 			"contatto":
 				_pannello_contatto(sel["id"])
+			"af":
+				_pannello_af(sel["id"])
 			_:
 				_pannello_ordini()
 	elif k == "aria":
@@ -580,7 +605,21 @@ func _pannello_ordini() -> void:
 		var icon: Texture2D = UI.tex("res://assets/pedine/%s.png" % ("alliedflag" if s == "A" else "axisflag"))
 		if eng.st["navi"].has(nid):
 			icon = UI.tf_tex(s, int(eng.st["tf"][eng.st["navi"][nid]["tf"]]["num"]))
-		_riga(icon, "%s   (%d aerei, %d pronti)" % [eng.nido_nome(nid), tot, pronti], "CAP %d  -  preparazione %s" % [int(ord["cap"].get(nid, 0)), "automatica" if ord["auto"].get(nid, true) else "a mano"], func(): _seleziona("nido", nid))
+		var prep := 0
+		var jl := 0
+		for kk in nido["prep"]:
+			prep += int(nido["prep"][kk])
+		for kk in nido["jl"]:
+			jl += int(nido["jl"][kk])
+		_riga(icon, "%s:  %d aerei" % [eng.nido_nome(nid), tot], "%d pronti, %d in preparazione, %d appena atterrati  -  CAP %d" % [pronti, prep, jl, int(ord["cap"].get(nid, 0))], func(): _seleziona("nido", nid))
+	var afs := eng.af_del_lato(s)
+	_sezione("Formazioni in volo")
+	if afs.is_empty():
+		panel_box.add_child(UI.wrap("Nessun aereo in volo. Le nuove missioni partono dalle portaerei e dalle basi.", 18, UI.MUTED, 500))
+	for fid in afs:
+		var af: Dictionary = eng.st["af"][fid]
+		var m: Dictionary = ord["_missioni"].get(fid, af["missione"])
+		_riga(UI.af_tex(s, int(af["num"])), "AF %d in %s:  %s" % [af["num"], FTData.nome_hex(eng.af_hex(fid)), eng.af_desc(fid)], _desc_missione(m), func(): _seleziona("af", fid))
 	if ord["lanci"].size() > 0:
 		_sezione("Missioni ordinate in questo turno")
 		var i := 0
@@ -590,7 +629,7 @@ func _pannello_ordini() -> void:
 			_riga(null, testo, _desc_missione(l["missione"]) + "  (tocca per annullare)", func(): _annulla_lancio(idx))
 			i += 1
 	_contatti_lista()
-	azione_box.add_child(UI.big_button("Ordini pronti", _conferma, 500))
+
 
 
 func _contatti_lista() -> void:
@@ -728,10 +767,8 @@ func _indietro() -> void:
 func _evidenzia_raggio_tf(tid: String) -> void:
 	var ev := {}
 	var start := eng.tf_hex(tid)
-	var r: Array = ord["rotte"].get(tid, [])
-	if r.size() > 0:
-		start = FTEngine.vh(r[-1])
-	var rimasto := eng.tf_mf(tid) - r.size()
+	var r: Array = []
+	var rimasto := eng.tf_mf(tid)
 	if rimasto > 0:
 		for h in FTData.dentro(start, rimasto):
 			if FTData.navigabile(h) and h != start:
@@ -746,11 +783,20 @@ func _pannello_tf(tid: String) -> void:
 	var tf: Dictionary = eng.st["tf"][tid]
 	var mf := eng.tf_mf(tid)
 	var r: Array = ord["rotte"].get(tid, [])
-	_titolo("Task Force %d" % tf["num"], "In %s. Movimento %d esagoni per turno. Tocca la mappa per tracciare la rotta (%d di %d)." % [FTData.nome_hex(eng.tf_hex(tid)), mf, r.size(), mf])
+	var full: Array = ord["percorsi"].get(tid, [])
+	var turni_arrivo := 0
+	if mf > 0 and full.size() > 0:
+		turni_arrivo = int(ceil(float(full.size()) / mf))
+	var spieg := "In %s. Le navi fanno %d esagoni all'ora (un turno). Tocca un punto della mappa, anche lontano: la TF ci va da sola nei turni seguenti. I numeri sulla rotta segnano dove sarà alla fine di ogni turno." % [FTData.nome_hex(eng.tf_hex(tid)), mf]
+	if turni_arrivo > 0:
+		spieg += " Arrivo fra %d turni." % turni_arrivo
+	if mf == 0:
+		spieg = "In %s. Questa TF non può muovere in questo turno (all'ancora, danneggiata o nella tempesta)." % FTData.nome_hex(eng.tf_hex(tid))
+	_titolo("Task Force %d" % tf["num"], spieg)
 	var h := UI.hbox(8)
 	panel_box.add_child(h)
 	h.add_child(UI.button("Indietro", _indietro, 19, 110))
-	h.add_child(UI.button("Cancella rotta", func(): ord["rotte"].erase(tid); _evidenzia_raggio_tf(tid); _aggiorna_tutto(), 19, 150))
+	h.add_child(UI.button("Cancella rotta", func(): _cancella_rotta(tid), 19, 150))
 	# ancora
 	var anc: bool = bool(ord["ancora"].get(tid, tf["ancorata"]))
 	if FTData.ter(eng.tf_hex(tid)) == "p" or tf["ancorata"]:
@@ -818,30 +864,49 @@ func _dialogo_dividi(tid: String) -> void:
 		_aggiorna_tutto(), 19, 140))
 
 
+func _imposta_percorso(tid: String, path: Array) -> void:
+	var full := []
+	for h in path:
+		var v: Vector2i = h if h is Vector2i else FTEngine.vh(h)
+		full.append([v.x, v.y])
+	ord["percorsi"][tid] = full
+	ord["rotte"][tid] = full.slice(0, maxi(0, eng.tf_mf(tid)))
+	if full.is_empty():
+		ord["destinazioni"][tid] = []
+	else:
+		ord["destinazioni"][tid] = full[-1]
+
+
+func _cancella_rotta(tid: String) -> void:
+	ord["percorsi"].erase(tid)
+	ord["rotte"].erase(tid)
+	ord["destinazioni"][tid] = []
+	_evidenzia_raggio_tf(tid)
+	_aggiorna_tutto()
+
+
+## Tocco sulla mappa con una TF scelta: la rotta arriva fin lì, anche se ci vogliono più turni.
+## Nei turni successivi la TF la segue da sola; i numeri sulla rotta segnano la fine di ogni turno.
 func _aggiungi_rotta(tid: String, dest: Vector2i) -> void:
-	var r: Array = ord["rotte"].get(tid, []).duplicate()
-	var start := eng.tf_hex(tid)
-	if r.size() > 0:
-		start = FTEngine.vh(r[-1])
-	if dest == start:
-		return
-	# tocco su un esagono già nella rotta: la si accorcia lì
-	for i in r.size():
-		if FTEngine.vh(r[i]) == dest:
-			ord["rotte"][tid] = r.slice(0, i + 1)
+	var full: Array = ord["percorsi"].get(tid, []).duplicate()
+	for i in full.size():
+		if FTEngine.vh(full[i]) == dest:
+			_imposta_percorso(tid, full.slice(0, i + 1))
 			_evidenzia_raggio_tf(tid)
 			_aggiorna_tutto()
 			return
-	var mf := eng.tf_mf(tid)
+	var start := eng.tf_hex(tid)
+	if full.size() > 0:
+		start = FTEngine.vh(full[-1])
+	if dest == start:
+		return
 	var path := FTData.percorso(start, dest, true)
 	if path.is_empty():
-		_toast("Le navi non possono arrivare lì.", false)
+		_toast("Le navi non possono arrivare lì (terra o fuori dal mare).", false)
 		return
 	for h in path:
-		if r.size() >= maxi(mf, 0):
-			break
-		r.append([h.x, h.y])
-	ord["rotte"][tid] = r
+		full.append([h.x, h.y])
+	_imposta_percorso(tid, full)
 	_evidenzia_raggio_tf(tid)
 	_aggiorna_tutto()
 
@@ -1219,7 +1284,7 @@ func _pannello_aria() -> void:
 			col = UI.BAD
 		_riga(UI.af_tex(s, int(af["num"])), "AF %d in %s:  %s" % [af["num"], FTData.nome_hex(eng.af_hex(fid)), eng.af_desc(fid)], sotto, func(): _seleziona("af", fid), col)
 	_contatti_lista()
-	azione_box.add_child(UI.big_button("Fine movimento", _conferma, 500))
+
 
 
 func _pannello_af(fid: String) -> void:
@@ -1240,6 +1305,12 @@ func _pannello_af(fid: String) -> void:
 	var h2 := UI.hbox(8)
 	panel_box.add_child(h2)
 	h2.add_child(UI.button("Ricognizione...", func(): modo = "ricognizione_af"; _toast("Tocca il punto verso cui volare.", false), 19, 170))
+	if req_corrente.get("k", "") != "aria":
+		panel_box.add_child(UI.wrap("Rotta a mano e atterraggio si scelgono nella fase del movimento aereo.", 17, UI.MUTED, 500))
+		_sezione("Composizione")
+		for g in af["gruppi"]:
+			_riga(UI.aereo_tex(g["tipo"]), "%d %s%s" % [int(g["q"]), g["tipo"], ("  (" + _nome_arma(g["arma"]) + ")") if g["arma"] != "" else ""], "", func(): pass)
+		return
 	h2.add_child(UI.button("Rotta a mano", func():
 		modo = "rotta_af"
 		ord[fid] = {"rotta": [], "quota": af["quota"], "cerca": true}
@@ -1308,7 +1379,7 @@ func _on_hex(h: Vector2i) -> void:
 		if h != eng.tf_hex(sel["id"]):
 			_aggiungi_rotta(sel["id"], h)
 			return
-	if req_corrente["k"] == "aria" and sel["t"] == "af":
+	if sel["t"] == "af" and modo in ["rotta_af", "bersaglio_af", "ricognizione_af"]:
 		var fid: String = sel["id"]
 		match modo:
 			"rotta_af":

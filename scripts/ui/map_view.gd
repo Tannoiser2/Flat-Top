@@ -264,6 +264,8 @@ func _draw() -> void:
 		_rotta(tid, rotte[tid], Color(UI.lato_col(lato), 0.95), true)
 	for fid in rotte_af:
 		_rotta(fid, rotte_af[fid], Color(0.75, 0.95, 1.0, 0.95), false)
+	# aerei su basi e portaerei del proprio lato
+	_disegna_nidi()
 	# unità
 	_disegna_unita(vis)
 	# selezione
@@ -314,6 +316,9 @@ func _anello(c: Vector2i, r: int, col: Color) -> void:
 	draw_arc(cp, rad, 0, TAU, 96, Color(col, 0.15), 14.0 / maxf(zoom, 0.25))
 
 
+var passi_turno := {}   # id TF -> esagoni per turno (per i segni sulla rotta)
+
+
 func _rotta(id: String, path: Array, col: Color, nave: bool) -> void:
 	var start := Vector2i(-999, -999)
 	if nave and eng.st["tf"].has(id):
@@ -334,6 +339,12 @@ func _rotta(id: String, path: Array, col: Color, nave: bool) -> void:
 			if k % 2 == 0:
 				draw_line(prev + seg * (float(k) / n), prev + seg * (float(k + 1) / n), col, w)
 		draw_circle(p, 6.0, col)
+		var pt: int = int(passi_turno.get(id, 0))
+		if pt > 0 and (i + 1) % pt == 0 and i < path.size() - 1:
+			draw_circle(p, 15.0, Color(0, 0, 0, 0.75))
+			draw_arc(p, 15.0, 0, TAU, 24, col, 3.0)
+			var tt := str((i + 1) / pt)
+			draw_string(UI.font_ui_b, p + Vector2(-5 * tt.length(), 7), tt, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, col)
 		prev = p
 	# freccia finale
 	if path.size() >= 1:
@@ -343,6 +354,26 @@ func _rotta(id: String, path: Array, col: Color, nave: bool) -> void:
 		var d := (lp - pp).normalized()
 		var nn := Vector2(-d.y, d.x)
 		draw_colored_polygon(PackedVector2Array([lp + d * 14, lp - d * 8 + nn * 10, lp - d * 8 - nn * 10]), col)
+
+
+func _disegna_nidi() -> void:
+	var per_hex := {}
+	for nid in eng.nidi_del_lato(lato):
+		var h := eng.nido_hex(nid)
+		if h.x < -100:
+			continue
+		per_hex[h] = int(per_hex.get(h, 0)) + eng.nido_aerei(nid)
+	var dim := _dim_pedina()
+	for h in per_hex:
+		if int(per_hex[h]) <= 0:
+			continue
+		var c := FTData.centro(h) + Vector2(-dim * 0.6, dim * 1.25)
+		var txt := "%d aerei" % int(per_hex[h])
+		var fs := dim * 0.42
+		var tw := UI.font_ui_b.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs)).x
+		draw_rect(Rect2(c + Vector2(-3, -fs), Vector2(tw + 6, fs + 5)), Color(0.05, 0.1, 0.15, 0.85))
+		draw_rect(Rect2(c + Vector2(-3, -fs), Vector2(tw + 6, fs + 5)), UI.lato_col(lato), false, 1.5)
+		draw_string(UI.font_ui_b, c, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs), UI.lato_col(lato))
 
 
 func _disegna_base(bid: String) -> void:
@@ -402,12 +433,18 @@ func _disegna_unita(vis: Array) -> void:
 		var c := FTData.centro(h)
 		var i := 0
 		for it in lst:
-			var passo := maxf(12.0, 13.0 / maxf(zoom, 0.05))
+			var passo := _dim_pedina() * 0.34
 			var off := Vector2(-passo + i * passo, -passo * 0.5 + i * passo * 0.8)
 			if i >= 4:
 				off = Vector2(-passo + (i - 4) * passo + 6, -passo * 0.5 + (i - 4) * passo * 0.8 + 4)
 			_pedina(c + off, it)
 			i += 1
+
+
+## Lato della pedina in coordinate della mappa: sullo schermo resta fra 22 e 46 pixel.
+func _dim_pedina() -> float:
+	var schermo := clampf(40.0 * zoom, 22.0, 46.0)
+	return schermo / maxf(zoom, 0.05)
 
 
 func _aggiungi(d: Dictionary, h: Vector2i, it: Array) -> void:
@@ -422,7 +459,7 @@ func _pedina(p: Vector2, it: Array) -> void:
 	var l: String = it[2]
 	var info: Dictionary = it[3]
 	var st: Dictionary = eng.st
-	var size_p := maxf(38.0, 40.0 / maxf(zoom, 0.05))
+	var size_p := _dim_pedina()
 	var r := Rect2(p - Vector2(size_p, size_p) / 2.0, Vector2(size_p, size_p))
 	var t: Texture2D
 	var alpha := 1.0
