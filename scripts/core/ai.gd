@@ -21,9 +21,16 @@ func _init(s := "A") -> void:
 	lato = s
 
 
+const COMBAT := preload("res://scripts/core/combat.gd")
+
+
 func decide(eng, s: String, req: Dictionary) -> Dictionary:
 	lato = s
+	if str(req.get("k", "")) in COMBAT.DECISIONI:
+		return COMBAT.ai_decide(eng, s, req)
 	match str(req.get("k", "")):
+		"schieramento":
+			return schieramento(eng, req)
 		"ordini":
 			return ordini(eng)
 		"aria":
@@ -32,6 +39,57 @@ func decide(eng, s: String, req: Dictionary) -> Dictionary:
 
 
 # ================================================================ ordini del turno
+
+## Schieramento segreto: le portaerei il più lontano possibile dalle basi nemiche, le altre TF verso
+## l'obiettivo; un po' di caso (stabile con il seme) per non essere prevedibili.
+func schieramento(eng, req: Dictionary) -> Dictionary:
+	var st: Dictionary = eng.st
+	var r: Dictionary = req.get("per", {}).get(lato, req)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(st["seed"]) * 7 + (1 if lato == "A" else 2)
+	var basi_nem := []
+	for bid in st["basi"]:
+		if st["basi"][bid]["lato"] != lato and not st["basi"][bid]["fuori"]:
+			basi_nem.append(eng.vh(st["basi"][bid]["hex"]))
+	var sc := FTData.scenario(st["scen"])
+	var obj: Dictionary = sc.get("obiettivi", {}).get(lato, {})
+	var meta := Vector2i(-1, -1)
+	for k in ["sbarco", "attacca_base"]:
+		var b: String = str(obj.get(k, ""))
+		if st["basi"].has(b):
+			meta = eng.vh(st["basi"][b]["hex"])
+			break
+	if meta.x < 0 and str(obj.get("sbarco", "")) == "guadalcanal":
+		meta = Vector2i(52, 23)
+	var pos := {}
+	var out_entra := {}
+	var tids: Array = r.get("tf", {}).keys()
+	tids.sort()
+	for tid in tids:
+		var z: Array = r["tf"][tid]["zona"]
+		var cv := false
+		for nid in st["tf"][tid]["navi"]:
+			if st["navi"][nid]["tipo"] in ["CV", "CVL"]:
+				cv = true
+		var punti := []
+		for h in z:
+			var v := 0.0
+			if cv or meta.x < 0:
+				var dm := 99
+				for bh in basi_nem:
+					dm = mini(dm, FTData.dist(h, bh))
+				v = float(mini(dm, 14))
+			else:
+				v = -float(FTData.dist(h, meta))
+			punti.append([v + rng.randf() * 2.0, h])
+		punti.sort_custom(func(a, b): return a[0] > b[0])
+		var scelta: Vector2i = punti[rng.randi_range(0, mini(punti.size() - 1, maxi(0, punti.size() / 6)))][1]
+		pos[tid] = [scelta.x, scelta.y]
+		if r["tf"][tid].has("entra_tra"):
+			if not out_entra.has(tid):
+				out_entra[tid] = int(r["tf"][tid]["entra_tra"][0])
+	return {"pos": pos, "entra": out_entra}
+
 
 func ordini(eng) -> Dictionary:
 	var st: Dictionary = eng.st

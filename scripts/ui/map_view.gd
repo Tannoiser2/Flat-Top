@@ -36,7 +36,7 @@ var _mouse_down := false
 func _ready() -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	tex = UI.tex("res://assets/map/mappa.webp")
+	tex = UI.tex(FTData.mappa_img)
 	set_process(true)
 
 
@@ -379,6 +379,9 @@ func _disegna_nidi() -> void:
 func _disegna_base(bid: String) -> void:
 	var b: Dictionary = eng.st["basi"][bid]
 	var h := FTEngine.vh(b["hex"])
+	if not FTData.volabile(h):
+		# base fuori mappa: la bandiera sull'esagono d'ingresso
+		h = eng.nido_hex(bid)
 	var c := FTData.centro(h)
 	var col := UI.lato_col(b["lato"])
 	var flag := UI.tex("res://assets/pedine/%s.png" % ("alliedflag" if b["lato"] == "A" else "axisflag"))

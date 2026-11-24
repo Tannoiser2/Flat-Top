@@ -36,28 +36,36 @@ Il fattore di lancio limita gli aerei che decollano e atterrano in un turno: fin
 
 L'autonomia è in turni: ogni AF deve atterrare entro il turno segnato. Chi resta senza carburante si perde e vale 10 punti al nemico invece di 2. Ogni combattimento aereo e ogni attacco in picchiata, con siluri o a bassa quota costa un turno di autonomia.
 
-Le basi fuori mappa (Truk, Kavieng, Australia, Nuova Caledonia) sono collegate al tavolo dalla pista rossa: gli aerei la percorrono come il resto della mappa."""],
+Ogni lancio ha una categoria: la migliore possibile, oppure minima, normale o massima a scelta. Scegliere una categoria peggiore lascia libero il fattore minimo per far atterrare altre formazioni nello stesso turno. Per cambiare armamento gli aerei pronti tornano in preparazione e poi di nuovo in pronti: ogni passaggio consuma fattore di prontezza.
+
+Le basi fuori mappa (Truk, Kavieng, Australia, Nuova Caledonia; Hawaii, Johnston, Marshall, Kwajalein e Midway sulle mappe degli scenari 6 e 7) non si raggiungono in volo: le formazioni decollate restano alcuni turni in transito e compaiono sull'esagono d'ingresso, dove nel primo turno non muovono. Per tornare raggiungono l'esagono d'ingresso, escono di mappa e atterrano dopo lo stesso numero di turni. Il transito dipende dalla distanza lungo la pista e dal movimento dell'aereo; sulle mappe di Midway e Wake è il numero stampato sul bordo."""],
+	["Schieramento", """Prima del primo turno ognuno schiera in segreto le sue Task Force nelle zone indicate dallo scenario (settori, distanza da un'isola o dal bordo della mappa). Le zone si vedono evidenziate sulla mappa quando tocchi una TF. Le TF che arrivano più tardi scelgono l'esagono d'ingresso e, dove lo scenario lo permette, anche il turno in cui entrano.
+
+Alcune navi partono all'ancora: nel Mar dei Coralli quelle schierate a Rabaul fino alle 1800 del 5 maggio, il convoglio di Tulagi finché non avvista una nave alleata o viene attaccato."""],
+	["Guardacoste, scogliere e montagne", """Le stelle sulle isole sono i guardacoste: rossi giapponesi, blu alleati. Vedono gli aerei sopra la loro isola (condizione 3 col sereno sopra la terra, 2 sopra gli esagoni costieri, 1 nelle nubi), quelli negli esagoni di mare accanto alla costa (condizione 1, solo col sereno) e le navi lungo la costa (condizione 2) o appena al largo (condizione 1). Non vedono gli aerei sopra una base nemica. I guardacoste giapponesi della Nuova Guinea vedono solo nel loro perimetro; alcuni scenari ne ignorano altri.
+
+Le Task Force non attraversano i lati d'esagono di scogliera (le linee blu tratteggiate) né quelli di terra piena fra due esagoni costieri. Gli aerei a bassa quota non scavalcano le montagne né i crinali neri delle isole: il pilota automatico sale in quota quando serve."""],
 	["Missioni aeree", """In questa versione ogni formazione ha una missione e vola da sola:
 - Attacco: punta sulle navi avvistate (seguendone gli spostamenti), su una base o su un esagono; cerca a ogni turno, attacca nel combattimento e poi rientra. Se il carburante non basta per tornare, rinuncia per tempo.
 - Ricognizione: un aereo vola verso il punto indicato cercando a ogni turno e poi torna indietro.
 - Pattuglia (CAP): i caccia restano sopra la portaerei o la base, si muovono con la TF e si danno il cambio da soli. Basta indicare quanti caccia tenere in aria.
 - Trasferimento: gli aerei vanno su un'altra portaerei o base e atterrano.
-Nella fase del movimento aereo puoi cambiare missione a ogni formazione, darle una rotta esagono per esagono, cambiare quota o farla atterrare."""],
-	["Combattimento aereo", """Il combattimento aria-aria avviene negli esagoni con navi o basi, oppure fino a due esagoni da una portaerei o una base con un tiro sulla tabella d'intercettazione. Solo gli intercettori possono attaccare: i caccia che volano con i propri bombardieri fanno da scorta.
+Nella fase del movimento aereo puoi cambiare missione a ogni formazione, darle una rotta esagono per esagono, cambiare quota o farla atterrare, staccarne un gruppo in una nuova formazione alla quota opposta o unire due formazioni nello stesso esagono."""],
+	["Combattimento aereo", """Il combattimento aria-aria avviene negli esagoni con navi o basi, oppure fino a due esagoni da una portaerei o una base con un tiro sulla tabella d'intercettazione, e anche durante il movimento quando una formazione entra dove ci sono caccia nemici sul tavolo alla stessa quota. Per ogni gruppo di caccia decidi tu: attacca le scorte, attacca i bombardieri o resta dov'è (di scorta ai tuoi bombardieri). Un caccia che intercetta non fa da scorta nello stesso turno.
 
 Prima gli intercettori affrontano le scorte; se alla fine sono almeno il doppio delle scorte sopravvissute passano tutti sui bombardieri, se le scorte sono il doppio degli intercettori i bombardieri sono salvi. Il tiro è simultaneo e ogni tipo d'aereo usa il suo valore aria-aria. Modificatori: -1 nelle nubi, -2 di notte, -6 per i caccia armati di bombe.
 
-Contraerea: ogni nave della TF attaccata spara contro ogni formazione che la attacca, con valore 4 sul totale della sua contraerea (-2 contro gli aerei in alta quota, -1 nelle nubi, -2 di notte).
+Contraerea: chi difende divide la contraerea delle TF attaccate (e della base, se c'entra) fra i gruppi attaccanti; il tiro vale 4 (-2 contro chi bombarda d'alta quota, -1 nelle nubi, -2 di notte).
 
-Attacco aereo: picchiata (gli aerei scendono dall'alta quota), siluri (a bassa quota) o bombardamento orizzontale. Il valore viene dalle tabelle d'impatto aereo: +2 contro navi immobilizzate o all'ancora, -2 nelle nubi, -4 di notte. I colpi raddoppiano se la portaerei o la base ha aerei sul ponte (pronti o appena atterrati) o, contro i siluri, aerei in preparazione."""],
+Attacco aereo: chi attacca sceglie per ogni gruppo armato la nave o la base bersaglio e il metodo: picchiata o bombardamento d'alta quota (solo se la formazione vola alta), bassa quota o siluri (solo contro le navi). Un gruppo può anche non attaccare e tenere le bombe. Il valore viene dalle tabelle d'impatto aereo: +2 contro navi immobilizzate o all'ancora, -2 nelle nubi, -4 di notte. I colpi raddoppiano se la portaerei o la base ha aerei sul ponte (pronti o appena atterrati) o, contro i siluri, aerei in preparazione."""],
 	["La tabella dei risultati", """Ogni tiro usa la tabella dei risultati: si incrocia il valore (BHT, da 1 a 15) con il numero di fattori che attaccano e si ottiene il numero risultato. Poi un dado: con 1 si sottrae 2, con 2 si sottrae 1, con 3-4 vale il numero, con 5 si aggiunge 1, con 6 si aggiunge 2. Con l'asterisco solo un 6 fa un colpo.
 
-Ogni colpo su una nave toglie un fattore d'artiglieria e uno di contraerea e, sulle portaerei, riduce il fattore di lancio e distrugge un aereo a bordo. Con metà dei punti di danno la nave dimezza la velocità, con il danno meno uno resta immobilizzata, con tutti affonda (e porta con sé gli aerei a bordo).
+Ogni colpo su una nave toglie un fattore d'artiglieria e uno di contraerea e, sulle portaerei, riduce il fattore di lancio e distrugge un aereo a bordo: lo sceglie chi attacca dopo una picchiata o un attacco a bassa quota di giorno, altrimenti chi difende. Con metà dei punti di danno la nave dimezza la velocità, con il danno meno uno resta immobilizzata, con tutti affonda (e porta con sé gli aerei a bordo).
 
 Ogni colpo su una base riduce il fattore di lancio di 2/1, la contraerea e il fattore di superficie di 1 e distrugge un aereo (due colpi per un aereo disperso). Le basi riparano un colpo per turno se non vengono attaccate."""],
-	["Combattimento di superficie", """Quando TF nemiche si trovano nello stesso esagono e si vedono, si combatte se almeno una delle due ha il contegno «Attacca». Ogni nave sta in linea d'artiglieria, in attacco con siluri oppure nello schermo (portaerei, trasporti, navi immobilizzate o all'ancora). Ognuno sceglie in segreto un dado: la somma è il valore per tutti i tiri del turno.
+	["Combattimento di superficie", """Quando TF nemiche si trovano nello stesso esagono e si vedono, ognuno decide in segreto se ingaggiare: basta che uno lo voglia e l'altro non può evitarlo. Poi ognuno assegna in segreto ogni nave alla linea d'artiglieria, all'attacco con siluri o allo schermo (le navi all'ancora o immobilizzate stanno nello schermo) e sceglie un dado: la somma dei due dadi è il valore per tutti i tiri.
 
-Prima spara l'artiglieria (solo corazzate e incrociatori pesanti possono colpire le corazzate), poi i siluri se il valore è almeno 10 di giorno o 7 di notte: quelli giapponesi valgono 15, quelli alleati 10. Chi resta con il triplo dell'artiglieria nemica sfonda e colpisce le navi dello schermo. Le munizioni si consumano a ogni tiro.
+Prima spara l'artiglieria: ognuno divide i suoi fattori fra le navi nemiche (contro le corazzate valgono solo quelli di corazzate e incrociatori pesanti). Poi i siluri, divisi allo stesso modo, se il valore è almeno 10 di giorno o 7 di notte: quelli giapponesi valgono 15, quelli alleati 10. Chi resta con il triplo dell'artiglieria nemica può sfondare e colpire le navi dello schermo, che rispondono al fuoco. Le munizioni si consumano a ogni tiro.
 
 Con il contegno «Bombarda» le navi nell'esagono di una base nemica la cannoneggiano con valore 8; la base risponde con il suo fattore di superficie."""],
 	["Sbarchi e vittoria", """I trasporti (AP e APD) devono gettare l'ancora negli esagoni indicati dallo scenario; dal turno dopo scaricano un turno alla volta, fino a otto turni, e ogni turno di scarico vale 3 punti (1 per gli APD). Un trasporto scarico vale meno se affondato.
@@ -65,13 +73,21 @@ Con il contegno «Bombarda» le navi nell'esagono di una base nemica la cannoneg
 Punti vittoria: 2 per ogni fattore aereo abbattuto (10 se perso senza combattere), 1 per ogni colpo su una base, 10 o 5 per ogni turno in cui Henderson, Rabaul o un'altra base hanno il fattore di lancio a zero, i punti di danno e d'affondamento delle navi secondo la tabella.
 
 Alle 2400 di ogni giorno, se lo scarto supera il livello di vittoria automatica dello scenario, la partita finisce. Altrimenti vince chi ha più punti alla fine, purché ne abbia almeno quanti chiede lo scenario."""],
-	["Questa versione", """- Le missioni e il pilota automatico sostituiscono la scheda di registrazione aerea: l'autonomia e i turni d'atterraggio sono calcolati dal gioco.
-- Il condizione 2 dell'avvistamento (il nemico può mentire del 50%) è resa da numeri approssimati in modo casuale.
-- Le formazioni hanno una sola quota per volta: gli attacchi misti si dividono in due formazioni (picchiatori in alto, aerosiluranti in basso), come fa la finestra di lancio.
+	["Decisioni: Suggerisci e Auto", """Ogni decisione è tua: schieramento, intercettazioni, bersagli e metodo d'attacco, contraerea, aerei distrutti a bordo, ingaggio, posizioni, dado e fuoco nel combattimento di superficie. In ogni finestra:
+- Suggerisci compila la scelta come la farebbe l'IA: puoi cambiarla prima di confermare;
+- Auto accetta subito la scelta dell'IA;
+- «Sempre automatico» fa decidere all'IA quel tipo di decisione per il resto della partita (si riattiva dal pannello degli ordini).
+
+Quando il nemico ti avvista con la condizione 2 puoi dichiarare il numero di navi e aerei vero, gonfiato del 50%, ridotto del 50% o a caso: si sceglie nel pannello degli ordini e vale finché non lo cambi. Dal pannello di un avvistamento puoi ordinare a una tua TF o AF nello stesso esagono di pedinare la TF nemica."""],
+	["Scenari 6 e 7: Midway e Wake", """Hanno mappe proprie, quasi tutte di mare, con gli atolli e i numeri sul bordo che indicano i turni di volo dalle basi fuori mappa (H Hawaii, J Johnston, M Marshall o Midway, K Kwajalein).
+Midway: il Giappone vince se sbarca almeno 200 punti sull'atollo; con 250 Midway diventa una base giapponese e gli aerei alleati rimasti a terra sono perduti. Sull'Hosho atterrano solo i Kate.
+Wake: vince il Giappone se sbarca a Wake almeno 50 punti più degli Alleati. I Buffalo partono dal Saratoga ma possono atterrare solo a terra. Alla fine ogni portaerei giapponese lontana più di 10 colonne dal bordo ovest dà 50 punti agli Alleati.
+I valori di Buffalo, Vindicator e B-24 vengono dalla tabella d'impatto aereo del modulo; movimento e autonomia sono stimati dai tipi simili, e così le capacità delle basi di Midway e Wake."""],
+	["Questa versione", """- Le missioni e il pilota automatico sostituiscono la scheda di registrazione aerea: l'autonomia e i turni d'atterraggio sono calcolati dal gioco, ma rotta, quota, atterraggio, divisione e unione delle formazioni si possono comandare a mano.
 - La pattuglia (CAP) è automatica sul numero di caccia scelto per ogni portaerei e base.
-- Nel combattimento aereo gli intercettori si dividono a metà fra scorte e bombardieri; i bersagli degli attacchi sono scelti dalla priorità della missione (portaerei o trasporti).
-- Le basi fuori mappa si raggiungono volando lungo la pista rossa.
-- Non sono usate le regole opzionali (sottomarini, colpi critici, rifornimento), né i guardacoste e i lati d'esagono di scogliera.
+- Le zone di schieramento «A» e «B» di Midway non sono stampate sulla mappa: qui sono il nord-ovest e il sud-ovest.
+- Non sono usate le regole opzionali (sottomarini, sommergibili tascabili, colpi critici, rifornimento in mare).
+- Le partite salvate con le versioni precedenti, che avevano meno decisioni, non si possono più riprendere.
 - Partite salvate sul server con un codice di sei lettere; partita online in due con ognuno che vede solo il suo lato."""],
 ]
 

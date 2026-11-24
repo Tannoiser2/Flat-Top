@@ -264,6 +264,9 @@ func _carica() -> void:
 	if d.is_empty():
 		stato_txt.text = "Partita non trovata. " + net.last_error
 		return
+	if int(d.get("versione", 1)) != FTEngine.VERSIONE_REGOLE:
+		stato_txt.text = "Questa partita è stata salvata con una versione precedente del gioco, con regole diverse: non si può riprendere."
+		return
 	var cfg: Dictionary = d.get("cfg", {})
 	cfg["replay"] = d.get("decisioni", [])
 	cfg["codice"] = code

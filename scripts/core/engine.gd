@@ -21,6 +21,8 @@ signal game_over(result: Dictionary)
 signal event(ev: Dictionary)
 
 const LATI := ["A", "J"]
+## Cambia quando cambia la sequenza delle decisioni: i salvataggi più vecchi non si possono rigiocare.
+const VERSIONE_REGOLE := 2
 const NOME_LATO := {"A": "Alleati", "J": "Giappone"}
 
 var st: Dictionary = {}
@@ -46,6 +48,7 @@ func setup(scen_id: String, seed: int, p_players: Dictionary) -> void:
 	players = p_players
 	rng.seed = seed
 	var sc := FTData.scenario(scen_id)
+	FTData.load_map(str(sc.get("mappa", "")))
 	st = {
 		"scen": scen_id, "seed": seed, "turno": 0, "turni": int(sc.get("turni", 18)),
 		"giorno": int(sc.get("giorno", 0)), "ora": int(sc.get("ora", 6)),
@@ -139,6 +142,13 @@ func _crea_flotte(sc: Dictionary) -> void:
 					st["nidi"][nid] = _nido_vuoto(nid, "nave", s)
 			if tf["entra"] > 0:
 				tf["fuori"] = true
+			if tdef.has("zona"):
+				tf["zona"] = tdef["zona"]
+			if tdef.has("entra_tra"):
+				tf["entra_tra"] = tdef["entra_tra"]
+			var sp: Dictionary = sc.get("speciali", {})
+			if sp.has("ancora_avvistamento") and vh(sp["ancora_avvistamento"]["hex"]) == vh(tf["hex"]):
+				tf["vincolo_ancora"] = "avvistamento"
 			st["tf"][tid] = tf
 
 
@@ -182,6 +192,125 @@ func _crea_nave(nome: String, lato: String, radar: Array) -> String:
 	n["lf0"] = n["lf"].duplicate()
 	st["navi"][nid] = n
 	return nid
+
+
+# ================================================================ schieramento segreto
+
+var _zone_cache := {}
+
+## Esagoni di una zona di schieramento: settori (1-8), sud/nord/est = entro n esagoni dal bordo della mappa,
+## colonne [min, max], vicino/lontano = [esagoni, n], o = unione di zone.
+func zona(spec: Dictionary) -> Array:
+	var key := var_to_str(spec)
+	if _zone_cache.has(key):
+		return _zone_cache[key]
+	var out := []
+	if spec.has("o"):
+		var vis := {}
+		for z in spec["o"]:
+			for h in zona(z):
+				if not vis.has(h):
+					vis[h] = true
+					out.append(h)
+	else:
+		for c in FTData.COLS:
+			for r in range(0, 44):
+				var h := Vector2i(c, r)
+				if FTData.navigabile(h) and _in_zona(spec, h):
+					out.append(h)
+	_zone_cache[key] = out
+	return out
+
+
+func _in_zona(spec: Dictionary, h: Vector2i) -> bool:
+	if spec.has("settori"):
+		var ok := false
+		for x in spec["settori"]:
+			if int(x) == FTData.settore(h) + 1:
+				ok = true
+		if not ok:
+			return false
+	if spec.has("sud") and h.y < 43 - int(spec["sud"]):
+		return false
+	if spec.has("nord") and h.y > int(spec["nord"]) - 1:
+		return false
+	if spec.has("est") and h.x < FTData.COLS - int(spec["est"]):
+		return false
+	if spec.has("colonne") and (h.x < int(spec["colonne"][0]) or h.x > int(spec["colonne"][1])):
+		return false
+	for k in ["vicino", "lontano"]:
+		if not spec.has(k):
+			continue
+		var n: int = int(spec[k][1])
+		var vicino := false
+		for p in spec[k][0]:
+			if FTData.dist(h, Vector2i(int(p[0]), int(p[1]))) <= n:
+				vicino = true
+				break
+		if vicino != (k == "vicino"):
+			return false
+	return true
+
+
+## Prima del primo turno ogni lato schiera in segreto le sue TF nelle zone dello scenario.
+func _schieramento() -> void:
+	var req_lati := {}
+	for s in LATI:
+		var tfs := {}
+		for tid in st["tf"]:
+			var tf: Dictionary = st["tf"][tid]
+			if tf["lato"] != s or not tf.has("zona"):
+				continue
+			var z := zona(tf["zona"])
+			if z.size() <= 1:
+				continue
+			tfs[tid] = {"num": int(tf["num"]), "hex": tf["hex"].duplicate(), "zona": z, "desc": tf_desc(tid), "entra": int(tf.get("entra", -1))}
+			if tf.has("entra_tra"):
+				tfs[tid]["entra_tra"] = tf["entra_tra"].duplicate()
+		if not tfs.is_empty():
+			req_lati[s] = {"tf": tfs}
+	if req_lati.is_empty():
+		return
+	st["fase"] = "schieramento"
+	state_changed.emit()
+	var out: Dictionary = await COMBAT._simul(self, "schieramento", req_lati)
+	if stop_requested:
+		return
+	for s in req_lati:
+		var risp: Dictionary = out.get(s, {}).get("pos", {})
+		for tid in req_lati[s]["tf"]:
+			var z: Array = req_lati[s]["tf"][tid]["zona"]
+			var et = req_lati[s]["tf"][tid].get("entra_tra", null)
+			if et != null:
+				var ent: int = clampi(int(out.get(s, {}).get("entra", {}).get(tid, int(et[0]))), int(et[0]), int(et[1]))
+				st["tf"][tid]["entra"] = ent
+				st["tf"][tid]["fuori"] = ent > 0
+			var h = risp.get(tid, null)
+			if h != null and vh(h) in z:
+				st["tf"][tid]["hex"] = [vh(h).x, vh(h).y]
+			elif not vh(st["tf"][tid]["hex"]) in z:
+				st["tf"][tid]["hex"] = [z[0].x, z[0].y]
+	# navi schierate a Rabaul (o dove dice lo scenario): all'ancora fino al turno stabilito
+	var af: Dictionary = st["speciali"].get("ancora_fino", {})
+	if not af.is_empty():
+		for tid in st["tf"]:
+			if tf_hex(tid) == vh(af["hex"]):
+				_ancora(tid, true)
+				st["tf"][tid]["vincolo_ancora"] = "turno"
+				st["tf"][tid]["ancora_fino"] = int(af["turno"])
+	add_log("*", "Le flotte sono schierate.")
+
+
+## L'ancora si può levare? (regole speciali degli scenari)
+func ancora_bloccata(tid: String) -> bool:
+	var tf: Dictionary = st["tf"][tid]
+	match str(tf.get("vincolo_ancora", "")):
+		"turno":
+			return int(st["turno"]) < int(tf.get("ancora_fino", 0))
+		"avvistamento":
+			var nem := nemico(tf["lato"])
+			return int(st.get("avvistata_nave_%s_turno" % nem, -1)) < 0 and not bool(tf.get("attaccata", false))
+	return false
 
 
 func _new_id(prefix: String) -> String:
@@ -234,7 +363,8 @@ func data_testo() -> String:
 	var sc := FTData.scenario(st["scen"])
 	var mesi := {"rabaul": ["23 febbraio"], "coral": ["4 maggio", "5 maggio", "6 maggio", "7 maggio", "8 maggio"],
 		"salomone": ["24 agosto", "25 agosto", "26 agosto"], "santacruz": ["25 ottobre", "26 ottobre", "27 ottobre"],
-		"guadalcanal": ["12 novembre", "13 novembre", "14 novembre", "15 novembre"]}
+		"guadalcanal": ["12 novembre", "13 novembre", "14 novembre", "15 novembre"],
+		"midway": ["4 giugno", "5 giugno", "6 giugno"], "wake": ["21 dicembre", "22 dicembre", "23 dicembre"]}
 	var key: String = str(sc.get("id", "")).split("_")[0]
 	var L: Array = mesi.get(key, [])
 	var g: int = int(st["giorno"])
@@ -291,9 +421,38 @@ func af_hex(fid: String) -> Vector2i:
 	return vh(af["hex"])
 
 
+## Basi fuori mappa (14.11-14.12): esagoni d'ingresso sul bordo e distanza lungo la pista rossa.
+const PORTE := {"australia": [[0, 39], [1, 39]], "nuova_caledonia": [[60, 43], [62, 43]],
+	"kavieng": [[18, 0], [20, 0]], "truk": [[26, 0]]}
+const DIST_FUORI := {"australia": 7, "nuova_caledonia": 23, "kavieng": 3, "truk": 33}
+
+
+func porte(nid: String) -> Array:
+	var out := []
+	var lista: Array = st["basi"][nid].get("porte", PORTE.get(nid, [])) if st["basi"].has(nid) else PORTE.get(nid, [])
+	for p in lista:
+		out.append(Vector2i(int(p[0]), int(p[1])))
+	return out
+
+
+func base_fuori(nid: String) -> bool:
+	return st["basi"].has(nid) and bool(st["basi"][nid]["fuori"]) and (PORTE.has(nid) or st["basi"][nid].has("porte"))
+
+
+## Turni di transito fra la base fuori mappa e l'esagono d'ingresso, secondo il movimento dell'AF.
+func ritardo_fuori(nid: String, fid: String) -> int:
+	if st["basi"].has(nid) and st["basi"][nid].has("ritardo"):
+		return int(st["basi"][nid]["ritardo"])
+	var mf := maxi(1, af_mf_base(fid))
+	return maxi(1, ceili(float(DIST_FUORI.get(nid, 0)) / mf))
+
+
 ## Esagono di un nido (portaerei o base). Vector2i(-999,-999) se non c'è (affondata).
+## Per le basi fuori mappa è il primo esagono d'ingresso.
 func nido_hex(nid: String) -> Vector2i:
 	if st["basi"].has(nid):
+		if base_fuori(nid):
+			return porte(nid)[0]
 		return vh(st["basi"][nid]["hex"])
 	var n: Dictionary = st["navi"].get(nid, {})
 	if n.is_empty() or n["affondata"] or n["tf"] == "":
@@ -374,6 +533,10 @@ func nido_accetta(nid: String, tipo: String) -> bool:
 	if n["affondata"]:
 		return false
 	ph = n["ph"]
+	if bool(st["speciali"].get("hosho_solo_kate", false)) and n["nome"] == "Hosho":
+		return tipo == "Kate"
+	if bool(st["speciali"].get("buffalo_solo_terra", false)) and tipo == "Buffalo":
+		return false
 	if ph == "CV":
 		return cls == "CV"
 	if ph == "FP":
@@ -390,9 +553,11 @@ func nido_accetta(nid: String, tipo: String) -> bool:
 # ================================================================ meteo
 
 func _meteo_iniziale(sc: Dictionary) -> void:
-	st["vento"] = [2, 2, 2, 2, 2, 2, 2, 2]  # direzione 3 (sud-est), come la freccia stampata
+	st["vento"] = []
+	for i in FTData.SETTORE_HEX.size():
+		st["vento"].append(2)  # direzione 3 (sud-est), come la freccia stampata
 	var mezza := str(sc.get("mezza_mappa", ""))
-	for s in 8:
+	for s in FTData.SETTORE_HEX.size():
 		if mezza == "ovest" and s % 4 >= 2:
 			continue
 		var dh: Vector2i = FTData.SETTORE_HEX[s]
@@ -423,7 +588,7 @@ func _meteo_iniziale(sc: Dictionary) -> void:
 func _fase_meteo() -> void:
 	var ora: int = st["ora"]
 	if ora in [6, 12, 18, 24]:
-		for s in 8:
+		for s in FTData.SETTORE_HEX.size():
 			var r := d6()
 			if r == 5:
 				st["vento"][s] = (int(st["vento"][s]) + 5) % 6
@@ -477,6 +642,12 @@ func run() -> void:
 func _turno() -> void:
 	var t: int = st["turno"]
 	var ora: int = st["ora"]
+	if t == 0 and not st.get("schierato", false):
+		await _schieramento()
+		if stop_requested:
+			return
+		st["schierato"] = true
+		_osserva_tutto("")
 	# ingresso di TF fuori mappa
 	for tid in st["tf"]:
 		var tf: Dictionary = st["tf"][tid]
@@ -526,12 +697,16 @@ func _turno() -> void:
 		var mosse: Dictionary = await _decide(s, {"k": "aria", "turno": t})
 		if stop_requested:
 			return
-		_movimento_aereo(s, mosse)
+		await _movimento_aereo(s, mosse)
+		if stop_requested:
+			return
 	st["muove"] = ""
 	# ---- combattimento
 	st["fase"] = "combattimento"
 	_osserva_tutto("")
-	COMBAT.fase_combattimento(self)
+	await COMBAT.fase_combattimento(self)
+	if stop_requested:
+		return
 	# ---- fine turno
 	st["fase"] = "riparazioni"
 	_sbarchi()
@@ -571,9 +746,32 @@ func _inizio_turno() -> void:
 		af["mf_turno"] = -1
 	for tid in st["tf"]:
 		st["tf"][tid]["mosso"] = 0
+	_transiti()
 	st["attaccate"] = {}
 	st["combattuti"] = st.get("combattuti_ora", {})
 	st["combattuti_ora"] = {}
+
+
+## AF in volo fra il bordo e una base fuori mappa.
+func _transiti() -> void:
+	for fid in st["af"].keys():
+		var af: Dictionary = st["af"][fid]
+		if not af.get("fuori_mappa", false):
+			continue
+		af["transito"] = int(af.get("transito", 1)) - 1
+		af["mosso"] = 99
+		if int(af["transito"]) > 0:
+			continue
+		if af.has("rientro"):
+			var nid: String = af["rientro"]
+			for g in af["gruppi"]:
+				_add(st["nidi"][nid]["jl"], g["tipo"], int(g["q"]))
+			add_log(af["lato"], "AF %d atterra a %s." % [af["num"], nido_nome(nid)], "minore")
+			st["af"].erase(fid)
+		else:
+			af["fuori_mappa"] = false
+			af.erase("transito")
+			add_log(af["lato"], "AF %d entra in mappa da %s." % [af["num"], FTData.nome_hex(af_hex(fid))], "minore")
 
 
 func _rinforzi() -> void:
@@ -740,6 +938,8 @@ func _applica_ordini(s: String, o: Dictionary) -> void:
 				tf["rotta"].append([h.x, h.y])
 	var ped: Dictionary = o.get("pedina", {})
 	st["lati"][s]["pedina"] = ped.duplicate()
+	if o.has("bugia") and str(o["bugia"]) in ["vero", "piu", "meno", "caso"]:
+		st["lati"][s]["bugia"] = str(o["bugia"])
 
 
 func _sposta_box(s: String, m: Dictionary) -> void:
@@ -894,11 +1094,13 @@ func _forma_af(s: String, l: Dictionary) -> String:
 		cap_max = 99999
 	if usato + tot > cap_max:
 		return ""
+	# categoria di lancio (14.8): la sceglie chi lancia; «auto» prende la migliore possibile
+	var voluta: String = str(l.get("categoria", "auto"))
 	var categoria := "max"
-	if int(nido["lf_pieno"]) + tot <= int(lf[1]) or int(lf[0]) >= 999:
+	if (voluta in ["auto", "min"]) and (int(nido["lf_pieno"]) + tot <= int(lf[1]) or int(lf[0]) >= 999):
 		categoria = "min"
 		nido["lf_pieno"] = int(nido["lf_pieno"]) + tot
-	elif usato + tot <= int(lf[0]):
+	elif (voluta in ["auto", "min", "norm"]) and usato + tot <= int(lf[0]):
 		categoria = "norm"
 	nido["lf_usato"] = usato + tot
 	for g in gruppi:
@@ -921,7 +1123,22 @@ func _forma_af(s: String, l: Dictionary) -> String:
 	if str(af["missione"].get("tipo", "")) == "cap" and not st["basi"].has(nid):
 		af["in_volo_di"] = nid
 	st["af"][fid] = af
-	# basi fuori mappa: l'AF resta «in volo» finché non arriva al bordo (pista)
+	# basi fuori mappa: l'AF vola lungo la pista e compare sull'esagono d'ingresso dopo qualche turno
+	if base_fuori(nid):
+		var rit := ritardo_fuori(nid, fid)
+		var porta: Vector2i = porte(nid)[0]
+		if l.has("porta"):
+			var pv2 := vh(l["porta"])
+			if pv2 in porte(nid):
+				porta = pv2
+		af["hex"] = [porta.x, porta.y]
+		af["fuori_mappa"] = true
+		af["transito"] = rit
+		af["quota"] = str(af.get("quota_dopo", af["quota"]))
+		af.erase("quota_dopo")
+		for g in af["gruppi"]:
+			g["entro"] = int(g["entro"]) + rit
+		af["mosso"] = 99
 	return fid
 
 
@@ -1039,6 +1256,8 @@ func _ancora(tid: String, si: bool) -> void:
 		return
 	if si == bool(tf["ancorata"]):
 		return
+	if not si and ancora_bloccata(tid):
+		return
 	tf["ancorata"] = si
 	tf["ancora_turno"] = st["turno"]
 	for nid in tf["navi"]:
@@ -1112,7 +1331,7 @@ func _movimento_tf(ordini: Dictionary) -> void:
 			if passo >= rotta.size():
 				continue
 			var nh := vh(rotta[passo])
-			if FTData.dist(nh, tf_hex(tid)) != 1 or not FTData.navigabile(nh):
+			if FTData.dist(nh, tf_hex(tid)) != 1 or not FTData.passaggio_nave(tf_hex(tid), nh):
 				tf["rotta"] = rotta.slice(0, passo)
 				continue
 			tf["hex"] = [nh.x, nh.y]
@@ -1206,6 +1425,10 @@ func _preparazione_aria(s: String) -> void:
 func _movimento_aereo(s: String, mosse: Dictionary) -> void:
 	if mosse == null:
 		mosse = {}
+	for d in mosse.get("_dividi_af", []):
+		_dividi_af(s, d)
+	for u in mosse.get("_unisci_af", []):
+		_unisci_af(s, u)
 	var nuove_missioni: Dictionary = mosse.get("_missioni", {})
 	for fid in nuove_missioni:
 		if st["af"].has(fid) and st["af"][fid]["lato"] == s:
@@ -1223,7 +1446,9 @@ func _movimento_aereo(s: String, mosse: Dictionary) -> void:
 		var o: Dictionary = mosse.get(fid, {})
 		if o.is_empty():
 			o = PILOT.ordini_af(self, fid)
-		_muovi_af(fid, o)
+		await _muovi_af(fid, o)
+		if stop_requested:
+			return
 	# atterraggi obbligati e perdite per carburante
 	for fid in st["af"].keys():
 		var af2: Dictionary = st["af"][fid]
@@ -1234,6 +1459,57 @@ func _movimento_aereo(s: String, mosse: Dictionary) -> void:
 		if st["af"].has(fid):
 			st["af"][fid].erase("nuova")
 	_osserva_tutto("")
+
+
+## Divide un'AF in volo: i gruppi indicati formano una nuova AF nello stesso esagono e alla stessa quota.
+func _dividi_af(s: String, d: Dictionary) -> void:
+	var fid: String = str(d.get("af", ""))
+	if not st["af"].has(fid) or st["af"][fid]["lato"] != s or st["af"][fid].get("fuori_mappa", false):
+		return
+	var af: Dictionary = st["af"][fid]
+	var idx: Array = []
+	for gi in d.get("gruppi", []):
+		if int(gi) >= 0 and int(gi) < af["gruppi"].size() and not int(gi) in idx:
+			idx.append(int(gi))
+	if idx.is_empty() or idx.size() >= af["gruppi"].size():
+		return
+	var nuovo: Dictionary = af.duplicate(true)
+	var fid2 := _new_id("F")
+	nuovo["id"] = fid2
+	nuovo["num"] = _num_af(s)
+	nuovo["gruppi"] = []
+	var resto := []
+	for gi in af["gruppi"].size():
+		if gi in idx:
+			nuovo["gruppi"].append(af["gruppi"][gi])
+		else:
+			resto.append(af["gruppi"][gi])
+	af["gruppi"] = resto
+	nuovo["hex"] = [af_hex(fid).x, af_hex(fid).y]
+	nuovo["in_volo_di"] = ""
+	if str(d.get("quota", "")) in ["A", "B"]:
+		nuovo["quota"] = str(d["quota"])
+	st["af"][fid2] = nuovo
+	add_log(s, "AF %d si divide: nasce l'AF %d." % [af["num"], nuovo["num"]], "minore")
+
+
+## Unisce due AF dello stesso lato nello stesso esagono (la seconda entra nella prima).
+func _unisci_af(s: String, u: Array) -> void:
+	if u.size() != 2:
+		return
+	var a: String = str(u[0])
+	var b: String = str(u[1])
+	if a == b or not st["af"].has(a) or not st["af"].has(b):
+		return
+	var fa: Dictionary = st["af"][a]
+	var fb: Dictionary = st["af"][b]
+	if fa["lato"] != s or fb["lato"] != s or af_hex(a) != af_hex(b) or fa.get("fuori_mappa", false) or fb.get("fuori_mappa", false):
+		return
+	for g in fb["gruppi"]:
+		fa["gruppi"].append(g)
+	fa["mosso"] = maxi(int(fa.get("mosso", 0)), int(fb.get("mosso", 0)))
+	st["af"].erase(b)
+	add_log(s, "L'AF %d si unisce all'AF %d." % [fb["num"], fa["num"]], "minore")
 
 
 func _muovi_af(fid: String, o: Dictionary) -> void:
@@ -1282,7 +1558,7 @@ func _muovi_af(fid: String, o: Dictionary) -> void:
 			break
 		if tempesta(nh) and not (o.get("atterra", "") != "" and nido_hex(str(o.get("atterra", ""))) == nh):
 			break
-		if FTData.montagna(nh) and af["quota"] == "B":
+		if af["quota"] == "B" and (FTData.montagna(nh) or FTData.crinale(cur, nh)):
 			break
 		af["hex"] = [nh.x, nh.y]
 		passi += 1
@@ -1295,7 +1571,7 @@ func _muovi_af(fid: String, o: Dictionary) -> void:
 		if not st["af"].has(fid):
 			return
 		# intercettazione speciale (14.13.2)
-		COMBAT.intercettazione_movimento(self, fid)
+		await COMBAT.intercettazione_movimento(self, fid)
 		if not st["af"].has(fid) or af_fattori(fid) <= 0:
 			return
 	# CAP: resta in volo sopra la portaerei
@@ -1322,6 +1598,16 @@ func _atterra(fid: String, nid: String, passi: int) -> bool:
 	if not st["af"].has(fid) or not st["nidi"].has(nid):
 		return false
 	var af: Dictionary = st["af"][fid]
+	if base_fuori(nid) and nido_lato(nid) == af["lato"] and af_hex(fid) in porte(nid):
+		var rit := ritardo_fuori(nid, fid)
+		af["fuori_mappa"] = true
+		af["rientro"] = nid
+		af["transito"] = rit
+		af["esposta"] = false
+		for g in af["gruppi"]:
+			g["entro"] = int(g["entro"]) + rit
+		add_log(af["lato"], "AF %d lascia la mappa verso %s (%d turni di volo)." % [af["num"], nido_nome(nid), rit], "minore")
+		return true
 	if nido_lato(nid) != af["lato"] or nido_hex(nid) != af_hex(fid):
 		return false
 	if bool(st["nidi"][nid].get("no_lanci", false)):
@@ -1427,6 +1713,8 @@ func _controlla_carburante(fid: String) -> void:
 	if not st["af"].has(fid):
 		return
 	var af: Dictionary = st["af"][fid]
+	if af.get("fuori_mappa", false):
+		return
 	var t: int = st["turno"]
 	var rimasti := []
 	var persi := 0
@@ -1504,9 +1792,9 @@ func _osserva_tutto(muove: String) -> void:
 		for k in nuovi[s]:
 			if st["tf"].has(k):
 				st["tf"][k]["esposta"] = true
-				if s == "J" and st["tf"][k]["lato"] == "A":
-					if st.get("avvistata_nave_A_turno", -1) < 0:
-						st["avvistata_nave_A_turno"] = st["turno"]
+				var kk: String = "avvistata_nave_%s_turno" % st["tf"][k]["lato"]
+				if st.get(kk, -1) < 0:
+					st[kk] = st["turno"]
 			elif st["af"].has(k):
 				st["af"][k]["esposta"] = true
 		var nn := {}
@@ -1541,9 +1829,51 @@ func _osserva_tutto(muove: String) -> void:
 		st["noti"][s] = nn
 
 
-## Unità di un lato che possono osservare: basi, TF sul tavolo, AF sul tavolo.
+## Copertura dei guardacoste (7.9.1-7.9.4): per ogni guardacoste attivo del lato, esagono -> [cond. aerei
+## con cielo sereno, cond. aerei con nubi, cond. navi].
+var _cw_cache := {}
+
+func copertura_cw(s: String) -> Array:
+	if _cw_cache.has(s):
+		return _cw_cache[s]
+	var ignora: Array = st["speciali"].get("cw_ignora_" + s, [])
+	var out := []
+	for cw in FTData.guardacoste:
+		if str(cw["lato"]) != s or cw["isola"] == null:
+			continue
+		var ch := Vector2i(int(cw["hex"][0]), int(cw["hex"][1]))
+		var salta := false
+		for ig in ignora:
+			if Vector2i(int(ig[0]), int(ig[1])) == ch:
+				salta = true
+		if salta:
+			continue
+		var isola: Array = FTData.isole_mappa[int(cw["isola"])]
+		# i guardacoste giapponesi della Nuova Guinea vedono solo dentro il perimetro tratteggiato
+		var limite := 6 if (s == "J" and isola.size() > 100) else 999
+		var cop := {}
+		for hh in isola:
+			var h := Vector2i(int(hh[0]), int(hh[1]))
+			if FTData.dist(h, ch) > limite:
+				continue
+			var t := FTData.ter(h)
+			if t == "p":
+				cop[h] = [2, 1, 2]
+				for nb in FTData.vicini(h):
+					if FTData.ter(nb) == "." and not cop.has(nb) and FTData.dist(nb, ch) <= limite:
+						cop[nb] = [1, 0, 1]
+			else:
+				cop[h] = [3, 1, 0]
+		out.append({"h": ch, "cop": cop})
+	_cw_cache[s] = out
+	return out
+
+
+## Unità di un lato che possono osservare: basi, guardacoste, TF sul tavolo, AF sul tavolo.
 func _osservatori(s: String, muove: String) -> Array:
 	var out := []
+	for cw in copertura_cw(s):
+		out.append({"k": "cw", "h": cw["h"], "cop": cw["cop"], "radar": false, "quota": ""})
 	for bid in st["basi"]:
 		var b: Dictionary = st["basi"][bid]
 		if b["lato"] != s or b["fuori"]:
@@ -1578,6 +1908,17 @@ func _osservatori(s: String, muove: String) -> Array:
 
 ## Numero di condizione (0-3) dalla tabella di osservazione.
 func _cond(ob: Dictionary, h: Vector2i, bers: String, quota_bers: String, day: bool) -> int:
+	if ob["k"] == "cw":
+		var cv: Array = ob["cop"].get(h, [])
+		if cv.is_empty():
+			return 0
+		if bers == "af":
+			# niente avvistamenti di aerei sopra una base aerea nemica (7.9.3)
+			for bid in st["basi"]:
+				if vh(st["basi"][bid]["hex"]) == h:
+					return 0
+			return int(cv[1] if meteo(h) >= 1 else cv[0])
+		return int(cv[2])
 	var d := FTData.dist(ob["h"], h)
 	var nuv := meteo(h) >= 1
 	var c := 0
@@ -1655,7 +1996,7 @@ func _osserva_movimento(fid: String) -> void:
 	# chi non muove osserva l'AF
 	var best := 0
 	for ob2 in _osservatori(e, m):
-		if FTData.dist(ob2["h"], ah) > 3:
+		if ob2["k"] != "cw" and FTData.dist(ob2["h"], ah) > 3:
 			continue
 		best = maxi(best, _cond(ob2, ah, "af", af["quota"], day))
 	if best > 0:
@@ -1674,8 +2015,9 @@ func _segna_visto(s: String, k: String, c: int) -> void:
 	st["memoria"][s][k] = noti[k].duplicate(true)
 	if tipo == "tf":
 		st["tf"][k]["esposta"] = true
-		if s == "J" and st.get("avvistata_nave_A_turno", -1) < 0:
-			st["avvistata_nave_A_turno"] = st["turno"]
+		var kk: String = "avvistata_nave_%s_turno" % st["tf"][k]["lato"]
+		if st.get(kk, -1) < 0:
+			st[kk] = st["turno"]
 	else:
 		st["af"][k]["esposta"] = true
 
@@ -1701,15 +2043,26 @@ func _info_tf(tid: String, cond: int, osservatore: String) -> Dictionary:
 	if cond >= 3:
 		out["portaerei"] = cv; out["maggiori"] = mag; out["minori"] = mino; out["navi"] = tot
 	elif cond == 2:
-		# il giocatore osservato può alterare il numero del 50%: qui lo fa il caso, in modo stabile nel turno
-		var h := hash(tid + str(st["turno"]) + osservatore)
-		var f := 0.5 + float(absi(h) % 101) / 100.0
+		# il giocatore osservato può dichiarare il numero di navi alterato fino al 50% (7.12.2)
+		var f := fattore_bugia(tf["lato"], tid + str(st["turno"]) + osservatore)
 		out["navi_circa"] = maxi(1, roundi(tot * f))
 		out["ha_portaerei"] = cv > 0; out["ha_maggiori"] = mag > 0; out["ha_minori"] = mino > 0
 	if bool(tf.get("svelata", false)):
 		out["nomi"] = nomi
 	out["ancorata"] = bool(tf["ancorata"]) and cond >= 3
 	return out
+
+
+## Quanto altera i numeri il lato osservato con la condizione 2: vero, +50%, -50% o a caso (stabile nel turno).
+func fattore_bugia(lato: String, chiave: String) -> float:
+	match str(st["lati"][lato].get("bugia", "caso")):
+		"vero":
+			return 1.0
+		"piu":
+			return 1.5
+		"meno":
+			return 0.5
+	return 0.5 + float(absi(hash(chiave)) % 101) / 100.0
 
 
 func _info_af(fid: String, cond: int) -> Dictionary:
@@ -1725,8 +2078,7 @@ func _info_af(fid: String, cond: int) -> Dictionary:
 	if cond >= 3:
 		out["armati"] = arm; out["scarichi"] = dis; out["quota"] = af["quota"]
 	elif cond == 2:
-		var h := hash(fid + str(st["turno"]))
-		var f := 0.5 + float(absi(h) % 101) / 100.0
+		var f := fattore_bugia(af["lato"], fid + str(st["turno"]))
 		out["aerei_circa"] = maxi(1, roundi((arm + dis) * f))
 		out["armati_si"] = arm > 0; out["scarichi_si"] = dis > 0
 	return out
@@ -1775,6 +2127,16 @@ func _sbarchi() -> void:
 			add_log("*", "Gili-Gili cade in mano giapponese.")
 		if sp.get("sbarco", {}).has(s) and regola.has("hex") and str(regola.get("nome", "")) == "Port Moresby" and int(st["sbarchi"][s]) >= 150:
 			_vittoria_immediata(s, "Sbarcati 150 punti a Port Moresby.")
+		var conq: Dictionary = sp.get("conquista", {})
+		if not conq.is_empty() and s == str(conq["lato"]) and int(st["sbarchi"][s]) >= int(conq["punti"]) and st["basi"].has(conq["base"]) and st["basi"][conq["base"]]["lato"] != s:
+			var bid: String = conq["base"]
+			var b2: Dictionary = st["basi"][bid]
+			var persi := nido_aerei(bid)
+			if persi > 0:
+				pv(s, persi * 2)
+			b2["lato"] = s
+			st["nidi"][bid] = _nido_vuoto(bid, "base", s)
+			add_log("*", "%s cade: diventa una base %s e gli aerei a terra sono perduti." % [b2["nome"], "giapponese" if s == "J" else "alleata"])
 		if st["scen"] == "guadalcanal" and s == "J" and int(st["sbarchi"]["J"]) >= 100:
 			_vittoria_immediata("J", "Sbarcati 100 punti su Guadalcanal.")
 
@@ -1857,6 +2219,23 @@ func _controlla_vittoria() -> void:
 		_vittoria_immediata("A" if va > vj else "J", "Vittoria automatica: %d punti di scarto." % absi(va - vj))
 
 
+## Wake: le portaerei giapponesi devono essere entro 10 colonne dal bordo ovest alla fine (+50 agli Alleati per ognuna fuori).
+func _bonus_cv_ovest() -> String:
+	var r: Dictionary = st["speciali"].get("cv_a_ovest", {})
+	if r.is_empty():
+		return ""
+	var fuori := 0
+	for nid in st["navi"]:
+		var n: Dictionary = st["navi"][nid]
+		if n["nome"] in r["navi"] and not n["affondata"] and n["tf"] != "":
+			if tf_hex(n["tf"]).x >= int(r["colonne"]):
+				fuori += 1
+	if fuori > 0:
+		pv("A", fuori * int(r["punti"]))
+		return "%d portaerei giapponesi lontane dal bordo ovest (+%d agli Alleati). " % [fuori, fuori * int(r["punti"])]
+	return ""
+
+
 func _fine_partita() -> void:
 	if st["fine"]:
 		return
@@ -1891,6 +2270,27 @@ func _fine_partita() -> void:
 				motivo = "%s sbarca di più (+50). " % NOME_LATO[chi]
 				va = st["lati"]["A"]["vp"]
 				vj = st["lati"]["J"]["vp"]
+		"soglia_sbarco":
+			var lato_s: String = str(v.get("lato", "J"))
+			var sb: int = int(st["sbarchi"][lato_s])
+			if sb >= int(v.get("soglia", 200)):
+				vinc = lato_s
+				motivo = "%s sbarca %d punti a %s." % [NOME_LATO[lato_s], sb, str(v.get("luogo", ""))]
+			else:
+				vinc = nemico(lato_s)
+				motivo = "%s sbarca solo %d punti a %s (ne servivano %d)." % [NOME_LATO[lato_s], sb, str(v.get("luogo", "")), int(v.get("soglia", 200))]
+		"differenza_sbarco":
+			motivo = _bonus_cv_ovest()
+			va = st["lati"]["A"]["vp"]
+			vj = st["lati"]["J"]["vp"]
+			if absi(va - vj) >= int(v.get("auto", 9999)):
+				vinc = "A" if va > vj else "J"
+				motivo += "Vittoria automatica: %d punti di scarto." % absi(va - vj)
+			else:
+				var lato_d: String = str(v.get("lato", "J"))
+				var diff: int = int(st["sbarchi"][lato_d]) - int(st["sbarchi"][nemico(lato_d)])
+				vinc = lato_d if diff >= int(v.get("scarto", 50)) else nemico(lato_d)
+				motivo += "Sbarchi a %s: Alleati %d, Giappone %d." % [str(v.get("luogo", "")), int(st["sbarchi"]["A"]), int(st["sbarchi"]["J"])]
 		_:
 			pass
 	if tipo == "standard" or tipo == "coral" or tipo == "guadalcanal":
@@ -1978,4 +2378,4 @@ func af_desc(fid: String) -> String:
 
 ## Dati sintetici per salvataggi: scenario, seme, giocatori, decisioni.
 func salvataggio() -> Dictionary:
-	return {"scen": st["scen"], "seed": st["seed"], "players": players, "decisioni": decisions.duplicate(true)}
+	return {"scen": st["scen"], "seed": st["seed"], "players": players, "decisioni": decisions.duplicate(true), "versione": VERSIONE_REGOLE}

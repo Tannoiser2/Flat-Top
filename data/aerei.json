@@ -374,6 +374,81 @@
    "s_to": 0
   }
  },
+ "Buffalo": {
+  "nome": "Buffalo",
+  "lato": "A",
+  "sigla": "BU",
+  "ruoli": "IE",
+  "mf": 7,
+  "rf": 5,
+  "aa": 7,
+  "classe": "CV",
+  "bht": {
+   "b_hl_gp": 0,
+   "b_hl_ap": 0,
+   "b_ll_gp": 0,
+   "b_ll_ap": 0,
+   "b_dv_gp": 0,
+   "b_dv_ap": 0,
+   "s_hl_gp": 0,
+   "s_hl_ap": 0,
+   "s_ll_gp": 0,
+   "s_ll_ap": 0,
+   "s_dv_gp": 0,
+   "s_dv_ap": 0,
+   "s_to": 0
+  }
+ },
+ "Vindicator": {
+  "nome": "Vindicator",
+  "lato": "A",
+  "sigla": "VI",
+  "ruoli": "I*B",
+  "mf": 7,
+  "rf": 6,
+  "aa": 3,
+  "classe": "CV",
+  "bht": {
+   "b_hl_gp": 3,
+   "b_hl_ap": 1,
+   "b_ll_gp": 5,
+   "b_ll_ap": 1,
+   "b_dv_gp": 6,
+   "b_dv_ap": 2,
+   "s_hl_gp": 0,
+   "s_hl_ap": 0,
+   "s_ll_gp": 1,
+   "s_ll_ap": 5,
+   "s_dv_gp": 3,
+   "s_dv_ap": 6,
+   "s_to": 0
+  }
+ },
+ "B-24": {
+  "nome": "B-24",
+  "lato": "A",
+  "sigla": "24",
+  "ruoli": "B",
+  "mf": 8,
+  "rf": 14,
+  "aa": 3,
+  "classe": "L",
+  "bht": {
+   "b_hl_gp": 10,
+   "b_hl_ap": 3,
+   "b_ll_gp": 0,
+   "b_ll_ap": 0,
+   "b_dv_gp": 0,
+   "b_dv_ap": 0,
+   "s_hl_gp": 0,
+   "s_hl_ap": 1,
+   "s_ll_gp": 0,
+   "s_ll_ap": 0,
+   "s_dv_gp": 0,
+   "s_dv_ap": 0,
+   "s_to": 0
+  }
+ },
  "Betty": {
   "nome": "Betty",
   "lato": "J",

@@ -156,17 +156,19 @@ static func _verso(eng, fid: String, dest: Vector2i, quota: String, cerca: bool,
 	if q == "B":
 		mf = mini(mf, eng.af_mf_base(fid) - 1)
 	var rotta := []
+	var prec := h
 	for i in mini(mf, path.size()):
 		var p: Vector2i = path[i]
-		if FTData.montagna(p):
+		if FTData.montagna(p) or FTData.crinale(prec, p):
 			q = "A"
+		prec = p
 		rotta.append([p.x, p.y])
 	var o := {"rotta": rotta, "quota": q, "cerca": cerca}
 	if atterra != "":
 		var arriva := (path.size() <= mf)
 		if arriva:
 			o["atterra"] = atterra
-			o["quota"] = "B"
+			o["quota_fine"] = "B"
 	return o
 
 

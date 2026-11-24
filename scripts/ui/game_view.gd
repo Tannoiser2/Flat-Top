@@ -72,6 +72,7 @@ func _ready() -> void:
 	eng.event.connect(_on_evento)
 	eng.game_over.connect(_on_fine)
 	map.eng = eng
+	map.tex = UI.tex(FTData.mappa_img)
 	map.lato = lato_vista
 	if modo_partita == "online":
 		online = FTOnline.new()
@@ -245,7 +246,7 @@ class _Luce extends Control:
 
 # ================================================================ aggiornamento
 
-const FASI := [["meteo", "Meteo"], ["ordini", "Ordini"], ["movimento_tf", "Task Force"], ["iniziativa", "Iniziativa"],
+const FASI := [["schieramento", "Schieramento"], ["meteo", "Meteo"], ["ordini", "Ordini"], ["movimento_tf", "Task Force"], ["iniziativa", "Iniziativa"],
 	["aria", "Aerei"], ["combattimento", "Combattimento"], ["riparazioni", "Fine turno"]]
 
 
@@ -390,8 +391,20 @@ func chiedi(s: String, req: Dictionary) -> Dictionary:
 		for nid in eng.nidi_del_lato(s):
 			ord["cap"][nid] = int(eng.st["nidi"][nid].get("cap", 0))
 			ord["auto"][nid] = bool(eng.st["nidi"][nid].get("auto", true))
+	elif req["k"] == "aria":
+		ord = {"_missioni": {}, "_dividi_af": [], "_unisci_af": []}
 	else:
-		ord = {"_missioni": {}}
+		var r: Dictionary = req["per"][s] if req.has("per") else req
+		req_corrente = r.duplicate()
+		req_corrente["k"] = req["k"]
+		req_corrente["lato"] = s
+		ord = _ord_iniziale(req_corrente)
+		if auto_sempre.has(req["k"]):
+			var v0 := _consiglio()
+			req_corrente = {}
+			return v0
+		if req_corrente.has("h"):
+			map.centra_su(FTEngine.vh(req_corrente["h"]))
 	stato_online("")
 	_aggiorna_tutto()
 	var v = await _risposta
@@ -461,6 +474,9 @@ func _pannello() -> void:
 		return
 	if k == "":
 		_pannello_attesa()
+		return
+	if k != "ordini" and k != "aria":
+		_pannello_decisione()
 		return
 	if lancio.is_empty():
 		var txt := "Ordini pronti: passa al movimento" if k == "ordini" else "Fine del movimento aereo"
@@ -620,6 +636,15 @@ func _pannello_ordini() -> void:
 		var af: Dictionary = eng.st["af"][fid]
 		var m: Dictionary = ord["_missioni"].get(fid, af["missione"])
 		_riga(UI.af_tex(s, int(af["num"])), "AF %d in %s:  %s" % [af["num"], FTData.nome_hex(eng.af_hex(fid)), eng.af_desc(fid)], _desc_missione(m), func(): _seleziona("af", fid))
+	_sezione("Avvistamenti nemici con condizione 2")
+	panel_box.add_child(UI.wrap("Quando il nemico ti vede con la condizione 2 puoi dichiarare il numero di navi e aerei alterato fino al 50%.", 17, UI.MUTED, 500))
+	var bug: String = str(ord.get("bugia", eng.st["lati"][s].get("bugia", "caso")))
+	panel_box.add_child(_scelta([["vero", "Verità"], ["piu", "+50%"], ["meno", "-50%"], ["caso", "A caso"]], bug, func(v): ord["bugia"] = v; _aggiorna_tutto(), 118))
+	if not auto_sempre.is_empty():
+		_sezione("Decisioni automatiche")
+		for kk in auto_sempre.keys():
+			var kd: String = kk
+			panel_box.add_child(UI.button("Torna a decidere: " + NOMI_DECISIONE.get(kd, kd), func(): auto_sempre.erase(kd); _aggiorna_tutto(), 17, 480))
 	if ord["lanci"].size() > 0:
 		_sezione("Missioni ordinate in questo turno")
 		var i := 0
@@ -1149,6 +1174,12 @@ func _pannello_lancio() -> void:
 	else:
 		est += "TROPPI aerei per un solo turno (massimo %d)." % (2 * int(lf[0]) - gia)
 	panel_box.add_child(UI.wrap(est, 19, UI.MUTED, 500))
+	if int(lf[0]) < 999:
+		var cat: String = str(lancio.get("categoria", "auto"))
+		panel_box.add_child(UI.label("Categoria di decollo", 20, UI.TEXT, UI.font_ui_b))
+		panel_box.add_child(_scelta([["auto", "La migliore"], ["min", "Minima"], ["norm", "Normale"], ["max", "Massima"]], cat,
+			func(v): lancio["categoria"] = v; _aggiorna_tutto(), 118))
+		panel_box.add_child(UI.wrap("Minima: movimento pieno ma pochi aerei. Normale: metà movimento. Massima: il doppio degli aerei, che restano sopra il ponte. Scegliere una categoria peggiore lascia libero il fattore minimo per gli atterraggi.", 16, UI.MUTED, 500))
 	# bersaglio
 	_sezione("Bersaglio")
 	var dest_txt := "da scegliere"
@@ -1232,11 +1263,11 @@ func _conferma_lancio() -> void:
 				sa.append({"tipo": g["tipo"], "q": g["q"] - meta, "arma": ""})
 			if meta > 0:
 				sb.append({"tipo": g["tipo"], "q": meta, "arma": ""})
-		ord["lanci"].append({"n": nid, "gruppi": alti + sa, "quota": "A", "missione": m.duplicate(true)})
-		ord["lanci"].append({"n": nid, "gruppi": bassi + sb, "quota": "B", "missione": m.duplicate(true)})
+		ord["lanci"].append({"n": nid, "gruppi": alti + sa, "quota": "A", "missione": m.duplicate(true), "categoria": str(lancio.get("categoria", "auto"))})
+		ord["lanci"].append({"n": nid, "gruppi": bassi + sb, "quota": "B", "missione": m.duplicate(true), "categoria": str(lancio.get("categoria", "auto"))})
 	else:
 		var quota := "B" if not bassi.is_empty() else "A"
-		ord["lanci"].append({"n": nid, "gruppi": alti + bassi + scorta, "quota": quota, "missione": m})
+		ord["lanci"].append({"n": nid, "gruppi": alti + bassi + scorta, "quota": quota, "missione": m, "categoria": str(lancio.get("categoria", "auto"))})
 	lancio = {}
 	modo = ""
 	map.anello = {}
@@ -1263,6 +1294,29 @@ func _pannello_contatto(k: String) -> void:
 	_titolo("Avvistamento", "%s in %s" % ["Navi nemiche" if n["tipo"] == "tf" else "Aerei nemici", FTData.nome_hex(FTEngine.vh(n["hex"]))])
 	panel_box.add_child(UI.wrap(_desc_contatto(n), 21, UI.TEXT, 500))
 	panel_box.add_child(UI.wrap("Condizione d'avvistamento %d (1 = solo la presenza, 3 = composizione esatta)." % int(n.get("cond", 0)), 18, UI.MUTED, 500))
+	# pedinamento (11): una TF o un'AF nello stesso esagono può seguire la TF nemica vista con condizione 2 o 3
+	if req_corrente.get("k", "") == "ordini" and n["tipo"] == "tf" and eng.st["tf"].has(k) and int(n.get("cond", 0)) >= 2:
+		var hn := FTEngine.vh(n["hex"])
+		var chi := []
+		for tid in eng.tf_del_lato(lato_vista):
+			if eng.tf_hex(tid) == hn:
+				chi.append([tid, "TF %d" % eng.st["tf"][tid]["num"]])
+		for fid in eng.af_del_lato(lato_vista):
+			if eng.af_hex(fid) == hn and not eng.st["af"][fid].get("fuori_mappa", false):
+				chi.append([fid, "AF %d" % eng.st["af"][fid]["num"]])
+		if not chi.is_empty():
+			_sezione("Pedinamento")
+			panel_box.add_child(UI.wrap("Chi pedina si muove dopo la TF nemica e la raggiunge, se il dado lo permette (5 o meno; +3 di notte, +1 tra le nubi).", 17, UI.MUTED, 500))
+			for c in chi:
+				var cid: String = c[0]
+				var attivo: bool = str(ord["pedina"].get(cid, "")) == k
+				var b := UI.button(("Smetti di pedinare con " if attivo else "Pedina con ") + c[1], func():
+					if attivo:
+						ord["pedina"].erase(cid)
+					else:
+						ord["pedina"][cid] = k
+					_aggiorna_tutto(), 19, 360)
+				panel_box.add_child(b)
 	panel_box.add_child(UI.button("Indietro", _indietro, 19, 140))
 
 
@@ -1323,6 +1377,30 @@ func _pannello_af(fid: String) -> void:
 			ord[fid] = {"rotta": [], "quota": "B", "atterra": n2}
 			ord["_missioni"][fid] = {"tipo": "manuale"}
 			_aggiorna_tutto(), 19, 220))
+	var gia_div := false
+	for d in ord.get("_dividi_af", []):
+		if d["af"] == fid:
+			gia_div = true
+	if af["gruppi"].size() > 1 and not gia_div:
+		var hd := UI.hbox(8)
+		panel_box.add_child(hd)
+		for gi in af["gruppi"].size():
+			var g0: Dictionary = af["gruppi"][gi]
+			var idx: int = gi
+			hd.add_child(UI.button("Stacca %d %s" % [int(g0["q"]), g0["tipo"]], func():
+				ord["_dividi_af"].append({"af": fid, "gruppi": [idx], "quota": "B" if af["quota"] == "A" else "A"})
+				_toast("I %s formano una nuova AF alla quota opposta, con la stessa missione." % g0["tipo"], false)
+				_aggiorna_tutto(), 17, 150))
+	elif gia_div:
+		panel_box.add_child(UI.wrap("Divisione ordinata: avviene all'inizio del movimento.", 17, UI.MUTED, 500))
+	for f2 in eng.af_del_lato(lato_vista):
+		if f2 != fid and eng.af_hex(f2) == eng.af_hex(fid) and not eng.st["af"][f2].get("fuori_mappa", false):
+			var gia := false
+			for u in ord.get("_unisci_af", []):
+				if u[1] == f2 or u[0] == f2:
+					gia = true
+			if not gia:
+				panel_box.add_child(UI.button("Unisci l'AF %d a questa" % eng.st["af"][f2]["num"], func(): ord["_unisci_af"].append([fid, f2]); _aggiorna_tutto(), 18, 300))
 	if ord.has(fid):
 		var o: Dictionary = ord[fid]
 		var h3 := UI.hbox(8)
@@ -1347,6 +1425,13 @@ func _on_hex(h: Vector2i) -> void:
 		map.queue_redraw()
 		return
 	var s := lato_vista
+	if req_corrente["k"] == "schieramento":
+		if sel["t"] == "tf" and req_corrente["tf"].has(sel["id"]) and h in req_corrente["tf"][sel["id"]]["zona"]:
+			ord["pos"][sel["id"]] = [h.x, h.y]
+			_aggiorna_tutto()
+		return
+	if not (req_corrente["k"] in ["ordini", "aria"]):
+		return
 	# scelta del bersaglio / destinazione di un lancio
 	if not lancio.is_empty():
 		var m: Dictionary = lancio["missione"]
@@ -1478,7 +1563,7 @@ func _on_fine(r: Dictionary) -> void:
 func _salva() -> void:
 	var cfg := {"scen": eng.st["scen"], "seed": eng.st["seed"], "modo": modo_partita, "lato": str(config.get("lato", "A")), "livello": int(config.get("livello", 2))}
 	_toast("Salvo la partita...", false)
-	var code: String = await main.get_net().save_game({"cfg": cfg, "decisioni": eng.decisions}, str(config.get("codice", "")))
+	var code: String = await main.get_net().save_game({"cfg": cfg, "decisioni": eng.decisions, "versione": FTEngine.VERSIONE_REGOLE}, str(config.get("codice", "")))
 	if code == "":
 		_toast("Salvataggio non riuscito: " + main.get_net().last_error, true)
 	else:
@@ -1505,3 +1590,398 @@ func _mostra_regole() -> void:
 	rv.incorporato = true
 	rv.chiudi = func(): p.queue_free()
 	p.add_child(rv)
+
+
+# ================================================================ decisioni dei combattimenti e schieramento
+
+const COMBAT := preload("res://scripts/core/combat.gd")
+const NOMI_DECISIONE := {"schieramento": "Schieramento", "intercetta": "Intercettazione", "bersagli": "Bersagli degli attacchi aerei",
+	"contraerea": "Tiro contraereo", "ponte": "Aerei distrutti a bordo", "sup_ingaggio": "Combattimento di superficie: ingaggio",
+	"sup_schiera": "Combattimento di superficie: posizioni", "sup_fuoco": "Fuoco d'artiglieria", "sup_siluri": "Lancio dei siluri",
+	"sup_penetra": "Attacco di penetrazione", "sup_schermo": "Fuoco dello schermo"}
+const NOMI_POS := {"art": "Artiglieria", "silu": "Siluri", "schermo": "Schermo"}
+const NOMI_BOX := {"pronti": "Pronti", "jl": "Appena atterrati", "prep": "In preparazione", "disp": "Disponibili"}
+
+var auto_sempre := {}   # tipo di decisione -> true: la prende l'IA senza chiedere
+
+
+func _auto_sempre(on: bool, k: String) -> void:
+	if on:
+		auto_sempre[k] = true
+	else:
+		auto_sempre.erase(k)
+
+
+## Il consiglio dell'IA per la decisione corrente.
+func _consiglio() -> Dictionary:
+	var s: String = req_corrente["lato"]
+	var r := req_corrente.duplicate(true)
+	if r["k"] == "schieramento":
+		return eng.ais[s].decide(eng, s, r)
+	return COMBAT.ai_decide(eng, s, r)
+
+
+## Risposta iniziale (neutra) di ogni decisione: la persona la completa, o chiede il consiglio.
+func _ord_iniziale(r: Dictionary) -> Dictionary:
+	match str(r["k"]):
+		"schieramento":
+			var pos := {}
+			var ent := {}
+			for tid in r["tf"]:
+				pos[tid] = r["tf"][tid]["hex"].duplicate()
+				if r["tf"][tid].has("entra_tra"):
+					ent[tid] = int(r["tf"][tid]["entra_tra"][0])
+			return {"pos": pos, "entra": ent}
+		"intercetta":
+			var a := {}
+			for g in r["miei"]:
+				a[g["id"]] = "no"
+			return {"assegna": a}
+		"bersagli":
+			return {"assegna": []}
+		"contraerea":
+			var p := {}
+			for g in r["gruppi"]:
+				p[str(g["gi"])] = 0
+			return {"parti": p}
+		"ponte":
+			return {"distrutti": {}}
+		"sup_ingaggio":
+			return {}
+		"sup_schiera":
+			var ps := {}
+			for d in r["mie"]:
+				ps[d["id"]] = "art" if "art" in d["pos_ok"] else d["pos_ok"][0]
+			return {"pos": ps, "dado": 0}
+		"sup_penetra":
+			return {"penetra": true, "fuoco": {}}
+	return {"fuoco": {}}
+
+
+func _decisione_valida() -> bool:
+	var r := req_corrente
+	match str(r["k"]):
+		"bersagli":
+			var fatti := {}
+			for a in ord.get("assegna", []):
+				fatti[int(a[0])] = true
+			return fatti.size() >= (r["gruppi"] as Array).size()
+		"ponte":
+			var es := 0
+			var di := 0
+			for bk in ord["distrutti"]:
+				if str(bk).begins_with("disp/"):
+					di += int(ord["distrutti"][bk])
+				else:
+					es += int(ord["distrutti"][bk])
+			return es == int(r["da_esposti"]) and di == int(r["da_disp"])
+		"sup_schiera":
+			return int(ord.get("dado", 0)) >= 1
+		"sup_ingaggio":
+			return ord.has("ingaggia")
+	return true
+
+
+func _pannello_decisione() -> void:
+	var k: String = req_corrente["k"]
+	var r := req_corrente
+	# pulsanti d'azione: conferma, consiglio, automatico
+	var ok := UI.big_button("Conferma la decisione", _conferma, 500)
+	ok.disabled = not _decisione_valida()
+	if k != "sup_ingaggio":
+		azione_box.add_child(ok)
+	var hb := UI.hbox(8)
+	azione_box.add_child(hb)
+	var bs := UI.button("Suggerisci", func(): ord = _consiglio(); _aggiorna_tutto(), 20, 160)
+	bs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(bs)
+	var ba := UI.button("Auto", func(): ord = _consiglio(); _conferma(), 20, 160)
+	ba.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(ba)
+	var cb := CheckBox.new()
+	cb.text = "Sempre automatico per questa decisione"
+	cb.add_theme_font_size_override("font_size", 17)
+	cb.button_pressed = auto_sempre.has(k)
+	cb.toggled.connect(_auto_sempre.bind(k))
+	azione_box.add_child(cb)
+	var hx = r.get("h", null)
+	match k:
+		"schieramento":
+			_dec_schieramento(r)
+		"intercetta":
+			_dec_intercetta(r)
+		"bersagli":
+			_dec_bersagli(r)
+		"contraerea":
+			_dec_contraerea(r)
+		"ponte":
+			_dec_ponte(r)
+		"sup_ingaggio":
+			_dec_ingaggio(r)
+		"sup_schiera":
+			_dec_schiera(r)
+		_:
+			_dec_fuoco(r)
+	if hx != null:
+		map.bersaglio = FTEngine.vh(hx)
+
+
+func _riga_conta(testo: String, val: int, mn: int, mx: int, cb: Callable, sotto := "") -> void:
+	var hh := UI.hbox(8)
+	var l := UI.label(testo, 20)
+	l.custom_minimum_size = Vector2(300, 0)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.clip_text = true
+	hh.add_child(l)
+	var bm := UI.button("-", func(): cb.call(maxi(mn, val - 1)), 22, 48)
+	bm.disabled = val <= mn
+	hh.add_child(bm)
+	var lv := UI.label(str(val), 22, UI.BRASS_L, UI.font_ui_b)
+	lv.custom_minimum_size = Vector2(44, 0)
+	lv.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hh.add_child(lv)
+	var bp := UI.button("+", func(): cb.call(mini(mx, val + 1)), 22, 48)
+	bp.disabled = val >= mx
+	hh.add_child(bp)
+	panel_box.add_child(hh)
+	if sotto != "":
+		panel_box.add_child(UI.wrap(sotto, 16, UI.MUTED, 500))
+
+
+func _scelta(opzioni: Array, attuale: String, cb: Callable, w := 150.0) -> HBoxContainer:
+	var hh := UI.hbox(6)
+	for o in opzioni:
+		var b := UI.button(o[1], func(): cb.call(o[0]), 18, w)
+		b.toggle_mode = true
+		b.button_pressed = str(o[0]) == attuale
+		hh.add_child(b)
+	return hh
+
+
+# ------------------------------------------------------------ schieramento segreto
+
+func _dec_schieramento(r: Dictionary) -> void:
+	_titolo("Schieramento segreto", "Scegli dove parte ogni Task Force: tocca una TF nell'elenco, poi un esagono evidenziato sulla mappa. Il nemico non vede il tuo schieramento.")
+	var evid := {}
+	for tid in r["tf"]:
+		# anteprima sulla mappa (il motore rimette comunque le posizioni decise)
+		if eng.st["tf"].has(tid):
+			eng.st["tf"][tid]["hex"] = ord["pos"][tid].duplicate()
+	for tid in r["tf"]:
+		var d: Dictionary = r["tf"][tid]
+		var h := FTEngine.vh(ord["pos"][tid])
+		var scelta: bool = sel["t"] == "tf" and sel["id"] == tid
+		_riga(UI.tf_tex(lato_vista, int(d["num"])), "TF %d in %s" % [int(d["num"]), FTData.nome_hex(h)], str(d["desc"]) + ("   (scelta: tocca la mappa)" if scelta else ""),
+			func(): sel = {"t": "tf", "id": tid}; map.centra_su(FTEngine.vh(ord["pos"][tid])); _aggiorna_tutto(), UI.BRASS_L if scelta else UI.TEXT)
+		if d.has("entra_tra"):
+			if not ord.has("entra"):
+				ord["entra"] = {}
+			var et: Array = d["entra_tra"]
+			var tv: int = int(ord["entra"].get(tid, int(et[0])))
+			var tid2: String = tid
+			_riga_conta("Entra in mappa alle %s" % eng.ora_testo((int(eng.st["ora"]) + tv - 1) % 24 + 1, -1), tv, int(et[0]), int(et[1]),
+				func(x): ord["entra"][tid2] = x; _aggiorna_tutto(), "Turno d'ingresso fra il %d e il %d." % [int(et[0]) + 1, int(et[1]) + 1])
+		if scelta:
+			for zh in d["zona"]:
+				evid[zh] = Color(0.95, 0.8, 0.3, 0.30)
+	map.evidenzia = evid
+
+
+# ------------------------------------------------------------ intercettazione
+
+func _dec_intercetta(r: Dictionary) -> void:
+	var h := FTEngine.vh(r["h"])
+	_titolo("Caccia in %s, quota %s" % [FTData.nome_hex(h), "alta" if r["quota"] == "A" else "bassa"],
+		"Decidi cosa fa ogni gruppo di caccia: attacca le scorte nemiche, attacca i bombardieri o resta dov'è (di scorta ai tuoi). Se le scorte sopravvissute sono il doppio dei tuoi caccia, respingono l'attacco ai bombardieri.")
+	_sezione("Aerei nemici")
+	var ts := []
+	for g in r["sco"]:
+		ts.append("%d %s (AF %d)" % [int(g["q"]), g["tipo"], int(g["af"])])
+	var tb := []
+	for g in r["bom"]:
+		tb.append("%d %s%s (AF %d)" % [int(g["q"]), g["tipo"], " armati" if g["armato"] else "", int(g["af"])])
+	panel_box.add_child(UI.wrap("Scorte: " + (", ".join(ts) if not ts.is_empty() else "nessuna"), 19, UI.TEXT, 500))
+	panel_box.add_child(UI.wrap("Bombardieri e altri: " + (", ".join(tb) if not tb.is_empty() else "nessuno"), 19, UI.TEXT, 500))
+	_sezione("I tuoi caccia")
+	for g in r["miei"]:
+		panel_box.add_child(UI.label("AF %d: %d %s" % [int(g["af"]), int(g["q"]), g["tipo"]], 21, UI.TEXT, UI.font_ui_b))
+		var opz := [["no", "Resta"]]
+		if not (r["sco"] as Array).is_empty():
+			opz.append(["sco", "Scorte"])
+		if not (r["bom"] as Array).is_empty():
+			opz.append(["bom", "Bombardieri"])
+		var gid: String = g["id"]
+		panel_box.add_child(_scelta(opz, str(ord["assegna"].get(gid, "no")), func(v): ord["assegna"][gid] = v; _aggiorna_tutto()))
+
+
+# ------------------------------------------------------------ bersagli
+
+func _dec_bersagli(r: Dictionary) -> void:
+	var h := FTEngine.vh(r["h"])
+	_titolo("Attacco dell'AF %d in %s" % [int(r["af"]), FTData.nome_hex(h)],
+		"Per ogni gruppo armato scegli il bersaglio e il metodo d'attacco. Picchiata e alta quota solo se l'AF vola alta; siluri solo contro le navi. Le navi ancorate o gravemente danneggiate sono più facili da colpire.")
+	var scelte := {}
+	for a in ord["assegna"]:
+		scelte[int(a[0])] = a
+	for g in r["gruppi"]:
+		var gi: int = int(g["gi"])
+		panel_box.add_child(UI.label("%d %s  (%s)" % [int(g["q"]), g["tipo"], _nome_arma(g["arma"])], 21, UI.BRASS_L, UI.font_ui_b))
+		var ob := OptionButton.new()
+		ob.add_theme_font_size_override("font_size", 19)
+		ob.custom_minimum_size = Vector2(500, 46)
+		var voci := [["no", "", "Non attacca (tiene le bombe)"]]
+		for n in r["navi"]:
+			var nome: String = (str(n["nome"]) + " ") if str(n["nome"]) != "" else ""
+			voci.append(["nave", n["id"], "TF %d: %s%s  danni %d/%d%s" % [int(n["tf"]), nome, n["tipo"], int(n["hits"]), int(n["danno"]), "  ancorata" if n["ancorata"] else ""]])
+		if str(r["base"]) != "":
+			voci.append(["base", r["base"], "Base di " + str(r["base_nome"])])
+		var cur = scelte.get(gi, null)
+		var sel_i := -1
+		for i in voci.size():
+			ob.add_item(voci[i][2], i)
+			if cur != null and str(cur[1]) == voci[i][0] and (voci[i][0] == "no" or str(cur[2]) == str(voci[i][1])):
+				sel_i = i
+		ob.selected = sel_i
+		ob.item_selected.connect(func(i):
+			var v: Array = voci[i]
+			var met: Array = g["metodi_base"] if v[0] == "base" else g["metodi_nave"]
+			_imposta_bersaglio(gi, [gi, v[0], v[1], met[0] if v[0] != "no" else ""]))
+		panel_box.add_child(ob)
+		if cur != null and str(cur[1]) != "no":
+			var met2: Array = g["metodi_base"] if str(cur[1]) == "base" else g["metodi_nave"]
+			var opz := []
+			for m in met2:
+				opz.append([m, _nome_metodo_breve(m)])
+			panel_box.add_child(_scelta(opz, str(cur[3]), func(m): _imposta_bersaglio(gi, [gi, cur[1], cur[2], m]), 120))
+
+
+func _imposta_bersaglio(gi: int, a: Array) -> void:
+	var out := []
+	for b in ord["assegna"]:
+		if int(b[0]) != gi:
+			out.append(b)
+	out.append(a)
+	ord["assegna"] = out
+	_aggiorna_tutto()
+
+
+func _nome_metodo_breve(m: String) -> String:
+	return {"dv": "Picchiata", "hl": "Alta quota", "ll": "Bassa quota", "to": "Siluri"}.get(m, m)
+
+
+# ------------------------------------------------------------ contraerea
+
+func _dec_contraerea(r: Dictionary) -> void:
+	var usato := 0
+	for k in ord["parti"]:
+		usato += int(ord["parti"][k])
+	_titolo("Contraerea in %s" % FTData.nome_hex(FTEngine.vh(r["h"])),
+		"L'AF nemica %d attacca. Dividi i %d fattori contraerei fra i suoi gruppi: contro chi attacca in picchiata, a bassa quota o con i siluri il tiro è più efficace." % [int(r["af"]), int(r["aaf"])])
+	panel_box.add_child(UI.label("Fattori da assegnare: %d di %d" % [int(r["aaf"]) - usato, int(r["aaf"])], 22, UI.BRASS_L, UI.font_ui_b))
+	for g in r["gruppi"]:
+		var k := str(g["gi"])
+		var v: int = int(ord["parti"].get(k, 0))
+		_riga_conta("%d %s" % [int(g["q"]), g["tipo"]], v, 0, v + int(r["aaf"]) - usato, func(x): ord["parti"][k] = x; _aggiorna_tutto(),
+			"%s su %s" % [_nome_metodo_breve(g["metodo"]), g["bersaglio"]])
+
+
+# ------------------------------------------------------------ aerei distrutti a bordo
+
+func _dec_ponte(r: Dictionary) -> void:
+	var es := 0
+	var di := 0
+	for bk in ord["distrutti"]:
+		if str(bk).begins_with("disp/"):
+			di += int(ord["distrutti"][bk])
+		else:
+			es += int(ord["distrutti"][bk])
+	_titolo("Aerei colpiti su %s" % r["nome"], ("Scegli quali aerei nemici vengono distrutti a bordo." if not r["proprio"] else "Scegli quali dei tuoi aerei a bordo vanno perduti.") +
+		" Prima quelli sul ponte (pronti, appena atterrati, in preparazione), sulle basi poi uno dei disponibili ogni due colpi.")
+	panel_box.add_child(UI.label("Da scegliere: %d sul ponte, %d disponibili" % [int(r["da_esposti"]) - es, int(r["da_disp"]) - di], 22, UI.BRASS_L, UI.font_ui_b))
+	for box in ["pronti", "jl", "prep", "disp"]:
+		var cas: Dictionary = r["caselle"][box]
+		if cas.is_empty():
+			continue
+		if box == "disp" and int(r["da_disp"]) == 0:
+			continue
+		_sezione(NOMI_BOX[box])
+		for key in cas:
+			var bk: String = box + "/" + key
+			var v: int = int(ord["distrutti"].get(bk, 0))
+			var lim: int = (int(r["da_disp"]) - di) if box == "disp" else (int(r["da_esposti"]) - es)
+			var parts: PackedStringArray = str(key).split("|")
+			var nome: String = parts[0] + (("  " + _nome_arma(parts[1])) if parts.size() > 1 and parts[1] != "" else "")
+			_riga_conta("%s  (%d)" % [nome, int(cas[key])], v, 0, mini(int(cas[key]), v + lim), func(x): ord["distrutti"][bk] = x; _aggiorna_tutto())
+
+
+# ------------------------------------------------------------ superficie
+
+func _dec_ingaggio(r: Dictionary) -> void:
+	var h := FTEngine.vh(r["h"])
+	_titolo("Navi nemiche in %s" % FTData.nome_hex(h), "Le tue navi e quelle nemiche sono nello stesso esagono. Il combattimento di superficie non è obbligatorio, ma se uno dei due lo vuole l'altro non può evitarlo.")
+	panel_box.add_child(UI.wrap("Tua artiglieria: %d fattori. Artiglieria nemica stimata: %d." % [int(r["forza"]), int(r["forza_nemica_circa"])], 21, UI.TEXT, 500))
+	panel_box.add_child(UI.big_button("Ingaggia il combattimento", func(): ord = {"ingaggia": true}; _conferma(), 500))
+	panel_box.add_child(UI.big_button("Non ingaggiare", func(): ord = {"ingaggia": false}; _conferma(), 500))
+
+
+func _dec_schiera(r: Dictionary) -> void:
+	var h := FTEngine.vh(r["h"])
+	_titolo("Combattimento di superficie in %s" % FTData.nome_hex(h), "Assegna in segreto la posizione di ogni nave e scegli il dado (1-6): la somma dei due dadi è il BHT di tutto il combattimento. Un dado alto aiuta chi è più forte.")
+	_sezione("Forza nemica")
+	var conta := {}
+	for d in r["nemiche"]:
+		conta[d["tipo"]] = int(conta.get(d["tipo"], 0)) + 1
+	var parti := []
+	for t in conta:
+		parti.append("%d %s" % [int(conta[t]), t])
+	panel_box.add_child(UI.wrap(", ".join(parti), 20, UI.TEXT, 500))
+	_sezione("Dado segreto")
+	var dd := []
+	for i in range(1, 7):
+		dd.append([i, str(i)])
+	panel_box.add_child(_scelta(dd, str(int(ord.get("dado", 0))), func(v): ord["dado"] = int(v); _aggiorna_tutto(), 68))
+	_sezione("Le tue navi")
+	for d in r["mie"]:
+		panel_box.add_child(UI.label("%s   art %d, siluri %d, munizioni %d" % [_nome_nave(d), int(d["art"]), int(d["silu"]) if not d["silu_usati"] else 0, int(d["mun"])], 19, UI.TEXT, UI.font_ui_b))
+		var opz := []
+		for p in d["pos_ok"]:
+			opz.append([p, NOMI_POS[p]])
+		var nid: String = d["id"]
+		panel_box.add_child(_scelta(opz, str(ord["pos"].get(nid, "")), func(v): ord["pos"][nid] = v; _aggiorna_tutto()))
+
+
+func _nome_nave(d: Dictionary) -> String:
+	var n: String = str(d.get("nome", ""))
+	if n == "" or n == str(d["tipo"]):
+		return str(d["tipo"])
+	return n + " " + str(d["tipo"])
+
+
+func _dec_fuoco(r: Dictionary) -> void:
+	var k: String = r["k"]
+	var usato := 0
+	var usato_bb := 0
+	var fuoco: Dictionary = ord.get("fuoco", {})
+	ord["fuoco"] = fuoco
+	for nid in fuoco:
+		usato += int(fuoco[nid])
+		if eng.st["navi"][nid]["tipo"] in ["BB", "BC"]:
+			usato_bb += int(fuoco[nid])
+	var testo := "Dividi i tuoi fattori fra le navi nemiche. Contro le corazzate valgono solo quelli di corazzate e incrociatori pesanti."
+	if k == "sup_siluri":
+		testo = "Dividi i fattori di siluri fra le navi nemiche."
+	elif k == "sup_penetra":
+		testo = "Hai il triplo della forza: puoi sfondare lo schermo e colpire le navi che proteggeva. Il nemico risponde solo con le navi dello schermo."
+	elif k == "sup_schermo":
+		testo = "Il nemico sfonda il tuo schermo: le navi dello schermo rispondono al fuoco."
+	_titolo(NOMI_DECISIONE.get(k, "Fuoco") + " in %s" % FTData.nome_hex(FTEngine.vh(r["h"])), testo + " BHT %d." % int(r["bht"]))
+	if k == "sup_penetra":
+		panel_box.add_child(_scelta([[true, "Sfonda lo schermo"], [false, "Rinuncia"]], str(bool(ord.get("penetra", true))), func(v): ord["penetra"] = bool(v); _aggiorna_tutto(), 220))
+	panel_box.add_child(UI.label("Fattori liberi: %d di %d" % [int(r["tot"]) - usato, int(r["tot"])], 22, UI.BRASS_L, UI.font_ui_b))
+	for d in r["bersagli"]:
+		var nid: String = d["id"]
+		var v: int = int(fuoco.get(nid, 0))
+		var mx: int = v + int(r["tot"]) - usato
+		if d["tipo"] in ["BB", "BC"] and k != "sup_siluri":
+			mx = mini(mx, v + int(r["tot_bb"]) - usato_bb)
+		_riga_conta("%s  danni %d/%d" % [_nome_nave(d), int(d["hits"]), int(d["danno"])], v, 0, mx, func(x): fuoco[nid] = x; _aggiorna_tutto(), NOMI_POS.get(str(d.get("pos", "")), ""))

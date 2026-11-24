@@ -15,6 +15,14 @@ static var basi: Dictionary = {}
 static var scenari: Array = []
 static var isole: Dictionary = {}
 static var grid: PackedStringArray = PackedStringArray()
+## Lati d'esagono speciali (chiave «c,r|c,r» con il primo esagono minore): scogliere e terra piena fermano
+## le TF, i crinali montuosi fermano gli aerei a bassa quota.
+static var lati_scogliera := {}
+static var lati_terra := {}
+static var lati_montagna := {}
+static var isole_mappa: Array = []      # isole: liste di esagoni di terra (parziali e pieni)
+static var isola_di := {}               # esagono -> indice dell'isola
+static var guardacoste: Array = []      # [{lato, hex, isola}]
 static var row0 := -4
 static var X0 := 128.0
 static var Y0 := 252.0
@@ -28,8 +36,14 @@ const DIRS_ODD := [Vector2i(0, -1), Vector2i(1, 0), Vector2i(1, 1), Vector2i(0, 
 ## Direzioni: 0 = nord, 1 = nord-est, 2 = sud-est, 3 = sud, 4 = sud-ovest, 5 = nord-ovest (sul gioco: 1-6)
 
 ## Esagoni direzionali (rosa dei venti) dei settori I-VIII
-const SETTORE_HEX := [Vector2i(9, 11), Vector2i(29, 11), Vector2i(49, 11), Vector2i(69, 11),
+static var SETTORE_HEX: Array = [Vector2i(9, 11), Vector2i(29, 11), Vector2i(49, 11), Vector2i(69, 11),
 	Vector2i(9, 32), Vector2i(29, 32), Vector2i(49, 32), Vector2i(69, 32)]
+## Divisione in settori della mappa corrente: larghezza in colonne, ultima riga dei settori in alto, settori per riga.
+static var sett_col_w := 20
+static var sett_row := 21
+static var sett_ncol := 4
+static var mappa_nome := ""
+static var mappa_img := "res://assets/map/mappa.webp"
 const SETTORE_NOME := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
 
 
@@ -47,7 +61,33 @@ static func load_all() -> void:
 	var sc := _json("res://data/scenari.json")
 	scenari = sc.get("scenari", [])
 	isole = sc.get("isole", {})
+	_loaded = true
+	load_map("")
+
+
+## Carica la mappa di uno scenario: "" è il Pacifico meridionale, "midway" e "wake" le mappe degli scenari 6 e 7.
+static func load_map(nome: String) -> void:
+	if nome == mappa_nome and not grid.is_empty():
+		return
+	mappa_nome = nome
+	var suf := "" if nome == "" else "_" + nome
+	mappa = _json("res://data/mappa%s.json" % suf)
 	grid = PackedStringArray(mappa.get("grid", []))
+	lati_scogliera = {}
+	lati_terra = {}
+	lati_montagna = {}
+	isola_di = {}
+	var lt := _json("res://data/lati%s.json" % suf)
+	for k in ["scogliere", "terra", "montagne"]:
+		var dest: Dictionary = {"scogliere": lati_scogliera, "terra": lati_terra, "montagne": lati_montagna}[k]
+		for e in lt.get(k, []):
+			var a := Vector2i(int(e[0]), int(e[1]))
+			dest[chiave_lato(a, vicino(a, int(e[2])))] = true
+	isole_mappa = lt.get("isole", [])
+	for i in isole_mappa.size():
+		for h in isole_mappa[i]:
+			isola_di[Vector2i(int(h[0]), int(h[1]))] = i
+	guardacoste = lt.get("guardacoste", [])
 	row0 = int(mappa.get("row0", -4))
 	X0 = float(mappa.get("x0", 128))
 	Y0 = float(mappa.get("y0", 252))
@@ -55,7 +95,13 @@ static func load_all() -> void:
 	DY = float(mappa.get("dy", 56))
 	COLS = int(mappa.get("cols", 80))
 	ROWS = grid.size()
-	_loaded = true
+	mappa_img = str(mappa.get("img", "res://assets/map/mappa.webp"))
+	sett_col_w = int(mappa.get("sett_col_w", 20))
+	sett_row = int(mappa.get("sett_row", 21))
+	sett_ncol = int(mappa.get("sett_ncol", 4))
+	SETTORE_HEX = []
+	for p in mappa.get("settori_hex", [[9, 11], [29, 11], [49, 11], [69, 11], [9, 32], [29, 32], [49, 32], [69, 32]]):
+		SETTORE_HEX.append(Vector2i(int(p[0]), int(p[1])))
 
 
 static func _json(path: String) -> Dictionary:
@@ -92,9 +138,32 @@ static func navigabile(h: Vector2i) -> bool:
 	return t == "." or t == "p"
 
 
-## Gli aerei volano ovunque tranne fuori dal tavolo (nero).
+## Gli aerei volano ovunque sul tavolo; la pista rossa e le basi fuori mappa si raggiungono solo
+## attraverso gli esagoni d'ingresso (14.11).
 static func volabile(h: Vector2i) -> bool:
-	return ter(h) != " "
+	var t := ter(h)
+	return t != " " and t != "t" and t != "B"
+
+
+static func chiave_lato(a: Vector2i, b: Vector2i) -> String:
+	if a.x > b.x or (a.x == b.x and a.y > b.y):
+		var t := a
+		a = b
+		b = t
+	return "%d,%d|%d,%d" % [a.x, a.y, b.x, b.y]
+
+
+## Una TF può passare da a all'esagono vicino b? (scogliere e lati di terra piena la fermano: 12.5)
+static func passaggio_nave(a: Vector2i, b: Vector2i) -> bool:
+	if not navigabile(b):
+		return false
+	var k := chiave_lato(a, b)
+	return not lati_scogliera.has(k) and not lati_terra.has(k)
+
+
+## Un aereo a bassa quota non attraversa i crinali montuosi.
+static func crinale(a: Vector2i, b: Vector2i) -> bool:
+	return lati_montagna.has(chiave_lato(a, b))
 
 
 static func montagna(h: Vector2i) -> bool:
@@ -155,11 +224,11 @@ static func dentro(h: Vector2i, r: int) -> Array:
 	return out
 
 
-## Settore (0-7) dell'esagono: quattro colonne di settori, due righe.
+## Settore dell'esagono (0-7 sul Pacifico meridionale: quattro colonne di settori, due righe; 0-3 su Midway e Wake).
 static func settore(h: Vector2i) -> int:
-	var col := clampi(h.x / 20, 0, 3)
-	var riga := 0 if h.y <= 21 else 1
-	return riga * 4 + col
+	var col := clampi(h.x / sett_col_w, 0, sett_ncol - 1)
+	var riga := 0 if h.y <= sett_row else 1
+	return riga * sett_ncol + col
 
 
 static func lettere_colonna(c: int) -> String:
@@ -245,7 +314,7 @@ static func percorso(a: Vector2i, b: Vector2i, per_nave: bool, evita: Dictionary
 			return path
 		open.erase(cur)
 		for nb in vicini(cur):
-			if per_nave and not navigabile(nb):
+			if per_nave and not passaggio_nave(cur, nb):
 				continue
 			if not per_nave and not volabile(nb):
 				continue

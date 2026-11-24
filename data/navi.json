@@ -1033,6 +1033,83 @@
    "danno": 5,
    "mun": 12,
    "silu": 0
+  },
+  "Akagi": {
+   "nome": "Akagi",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 4,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 0
+  },
+  "Kaga": {
+   "nome": "Kaga",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 4,
+   "mv": 2,
+   "danno": 6,
+   "mun": 12,
+   "silu": 0
+  },
+  "Soryu": {
+   "nome": "Soryu",
+   "tipo": "CV",
+   "lato": "J",
+   "art": 1,
+   "aa": 4,
+   "mv": 2,
+   "danno": 5,
+   "mun": 12,
+   "silu": 0
+  },
+  "Hosho": {
+   "nome": "Hosho",
+   "tipo": "CVL",
+   "lato": "J",
+   "art": 1,
+   "aa": 2,
+   "mv": 1,
+   "danno": 2,
+   "mun": 14,
+   "silu": 0
+  },
+  "Nagato": {
+   "nome": "Nagato",
+   "tipo": "BB",
+   "lato": "J",
+   "art": 18,
+   "aa": 3,
+   "mv": 1,
+   "danno": 12,
+   "mun": 24,
+   "silu": 0
+  },
+  "Chiyoda": {
+   "nome": "Chiyoda",
+   "tipo": "AV",
+   "lato": "J",
+   "art": 1,
+   "aa": 2,
+   "mv": 2,
+   "danno": 3,
+   "mun": 12,
+   "silu": 0
+  },
+  "Nisshin": {
+   "nome": "Nisshin",
+   "tipo": "AV",
+   "lato": "J",
+   "art": 1,
+   "aa": 2,
+   "mv": 2,
+   "danno": 3,
+   "mun": 12,
+   "silu": 0
   }
  },
  "generiche": {
@@ -1221,6 +1298,20 @@
    1,
    1,
    1,
+   "FP"
+  ],
+  "Chiyoda": [
+   8,
+   2,
+   1,
+   2,
+   "FP"
+  ],
+  "Nisshin": [
+   8,
+   2,
+   1,
+   2,
    "FP"
   ]
  },

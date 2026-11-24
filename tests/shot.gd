@@ -39,6 +39,11 @@ func _run(w: int, h: int, scen: String) -> void:
 	main.start_game({"scen": scen, "seed": 77, "modo": "solo", "lato": "A", "livello": 2})
 	await create_timer(1.5).timeout
 	var g = main.current
+	if g.req_corrente.get("k", "") == "schieramento":
+		await _snap("03b_schieramento")
+		g.ord = g._consiglio()
+		g._conferma()
+		await create_timer(0.8).timeout
 	await _snap("04_ordini")
 	# seleziona la prima TF e traccia una rotta
 	var tids = g.eng.tf_del_lato("A")
