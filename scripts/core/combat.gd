@@ -1313,8 +1313,11 @@ static func superficie(eng, h: Vector2i) -> void:
 			if not st["tf"].has(tid):
 				continue
 			for nid in st["tf"][tid]["navi"]:
-				if pos.get(nid, "") in ["art", "silu"] and not st["navi"][nid]["affondata"]:
-					resto[s] += _art(st["navi"][nid])
+				var nr: Dictionary = st["navi"][nid]
+				# contano solo le navi che hanno ancora munizioni (19.7, 19.8)
+				var carica: bool = (not nr.get("mun_usata", false)) if nr["tipo"] in ["DD", "APD"] else int(nr["mun"]) > 0
+				if pos.get(nid, "") in ["art", "silu"] and not nr["affondata"] and carica:
+					resto[s] += _art(nr)
 	for s in ["A", "J"]:
 		var e3: String = eng.nemico(s)
 		if resto[s] <= 0 or resto[s] < 3 * maxi(1, resto[e3]):
@@ -1458,10 +1461,12 @@ static func _applica_danni_sup(eng, danni: Dictionary, rep: Array) -> void:
 
 static func ai_sup_ingaggio(_eng, _s: String, req: Dictionary) -> Dictionary:
 	var vuole := false
+	var f: int = int(req.get("forza", 0))
+	var fn: int = int(req.get("forza_nemica_circa", 0))
 	for c in req.get("contegni", []):
-		if str(c) in ["attacca", "bombarda"]:
+		if str(c) in ["attacca", "bombarda"] and f * 5 >= fn * 4:
 			vuole = true
-	if int(req.get("forza", 0)) >= 2 * maxi(1, int(req.get("forza_nemica_circa", 0))) and int(req.get("forza", 0)) >= 10:
+	if f >= 2 * maxi(1, fn) and f >= 10:
 		vuole = true
 	return {"ingaggia": vuole}
 

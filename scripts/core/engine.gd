@@ -1216,6 +1216,7 @@ func _dividi_tf(s: String, d: Dictionary) -> void:
 		tf["navi"].erase(nid)
 		nt["navi"].append(nid)
 		st["navi"][nid]["tf"] = ntid
+		st["navi"][nid]["ancorata"] = false
 	st["tf"][ntid] = nt
 	add_log(s, "La TF %d si divide: nasce la TF %d." % [tf["num"], nt["num"]])
 

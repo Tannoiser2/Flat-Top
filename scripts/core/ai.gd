@@ -355,6 +355,8 @@ func _attacchi(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 	var st: Dictionary = eng.st
 	var t: int = st["turno"]
 	var ora: int = st["ora"]
+	var sc_obj: Dictionary = FTData.scenario(st["scen"]).get("obiettivi", {})
+	var nemico_sbarca: bool = sc_obj.get(eng.nemico(lato), {}).has("sbarco")
 	# bersagli in ordine di valore
 	var bers := []
 	for c in contatti:
@@ -365,8 +367,11 @@ func _attacchi(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 			val = 100
 		elif bool(c["info"].get("ha_maggiori", false)) or int(c["info"].get("maggiori", 0)) > 0:
 			val = 40
-		if obj.has("difendi") and c.get("info", {}).get("ha_minori", false):
+		if obj.has("difendi") and (c.get("info", {}).get("ha_minori", false) or int(c.get("info", {}).get("minori", 0)) > 0):
 			val += 10
+			# un convoglio che punta sulla base da difendere vale più di tutto il resto
+			if nemico_sbarca and st["basi"].has(str(obj["difendi"])) and FTData.dist(c["hex"], eng.vh(st["basi"][str(obj["difendi"])]["hex"])) <= 25 and not _ha_cv(c):
+				val += 70
 		val -= c["eta"] * 15
 		bers.append({"val": val, "c": c})
 	bers.sort_custom(func(a, b): return a["val"] > b["val"])
@@ -477,6 +482,8 @@ func _attacchi(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 		var miss := {"tipo": "attacco", "hex": [scelto["hex"].x, scelto["hex"].y]}
 		if scelto.has("k"):
 			miss["bersaglio"] = scelto["k"]
+			if nemico_sbarca and obj.has("difendi"):
+				miss["priorita"] = "trasporti"
 		else:
 			miss["bersaglio_base"] = scelto["base"]
 		if not gruppi_alti.is_empty():
@@ -556,6 +563,17 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 						best = sh
 				dest = best
 				if h == best:
+					# prima di gettare l'ancora le navi da guerra si staccano: all'ancora finirebbero tutte
+					# nello schermo e non potrebbero difendere i trasporti
+					if ha_sup:
+						var scorta := []
+						for nid in tf["navi"]:
+							if not st["navi"][nid]["tipo"] in ["AP", "APD", "AO", "PG"] and st["navi"][nid]["tipo"] != "CV" and st["navi"][nid]["tipo"] != "CVL":
+								scorta.append(nid)
+						if not scorta.is_empty() and scorta.size() < tf["navi"].size():
+							if not o.has("dividi"):
+								o["dividi"] = []
+							o["dividi"].append({"tf": tid, "navi": scorta})
 					o["ancora"][tid] = true
 					continue
 			else:
@@ -573,7 +591,32 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 					if d2 < pd:
 						pd = d2
 						preda = c["hex"]
-			if bersaglio_base.x > -100 and _ha_munizioni(eng, tid):
+			var miei_magg := 0
+			for nid2 in tf["navi"]:
+				if st["navi"][nid2]["tipo"] in ["BB", "CA", "CAV", "BC"] and int(st["navi"][nid2]["art"]) > 0:
+					miei_magg += 1
+			var minaccia := Vector2i(-999, -999)
+			for c in contatti:
+				if c["tipo"] == "tf" and c["eta"] <= 1 and FTData.dist(h, c["hex"]) <= 2:
+					var magg: int = int(c["info"].get("maggiori", 2 if c["info"].get("ha_maggiori", false) else 0))
+					if magg > miei_magg:
+						minaccia = c["hex"]
+			if minaccia.x > -100:
+				# troppo forti: ci si allontana verso la propria base e si evita il combattimento
+				contegno = "evita"
+				var via := h
+				var bd2 := -1
+				for nb in FTData.dentro(h, 2):
+					if FTData.navigabile(nb):
+						var d3 := FTData.dist(nb, minaccia) * 3 - (FTData.dist(nb, difesa) if difesa.x > -100 else 0)
+						if d3 > bd2:
+							bd2 = d3
+							via = nb
+				dest = via
+				preda = Vector2i(-999, -999)
+			if minaccia.x > -100:
+				pass
+			elif bersaglio_base.x > -100 and _ha_munizioni(eng, tid):
 				dest = bersaglio_base
 				contegno = "bombarda"
 			elif preda.x > -100 and pd <= 8:
