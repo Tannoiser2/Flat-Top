@@ -166,6 +166,25 @@ func _contatti(eng) -> Array:
 	return out
 
 
+## L'esagono è nel raggio d'attacco (12 esagoni) di una base nemica con bombardieri?
+func _sotto_aerei(eng, h: Vector2i) -> bool:
+	var st: Dictionary = eng.st
+	for bid in st["basi"]:
+		var b: Dictionary = st["basi"][bid]
+		if b["lato"] == lato or b["fuori"] or not st["nidi"].has(bid):
+			continue
+		if FTData.dist(eng.vh(b["hex"]), h) > 12 or int(eng.nido_lf(bid)[0]) <= 0:
+			continue
+		var bomb := 0
+		for box in ["prep", "pronti", "jl"]:
+			for k in st["nidi"][bid][box]:
+				if FTData.aerei[str(k).split("|")[0]]["ruoli"].contains("B") and not FTData.aerei[str(k).split("|")[0]]["ruoli"].contains("E"):
+					bomb += int(st["nidi"][bid][box][k])
+		if bomb >= 3:
+			return true
+	return false
+
+
 static func _ha_cv(c: Dictionary) -> bool:
 	var i: Dictionary = c.get("info", {})
 	return bool(i.get("ha_portaerei", false)) or int(i.get("portaerei", 0)) > 0
@@ -216,6 +235,49 @@ func _caccia_nido(eng, nid: String) -> int:
 	return t
 
 
+# ================================================================ corridoio dei convogli
+
+## Se il nemico deve sbarcare vicino a una base che difendiamo, i convogli arrivano lungo le rotte fra le
+## sue basi e la nostra (lo Slot, a Guadalcanal): esagoni di quei corridoi entro 22 dalla base difesa.
+func _corridoio(eng) -> Array:
+	if piani.has("corridoio"):
+		return piani["corridoio"]
+	var st: Dictionary = eng.st
+	var out := []
+	var sc_obj: Dictionary = FTData.scenario(st["scen"]).get("obiettivi", {})
+	var obj: Dictionary = sc_obj.get(lato, {})
+	if sc_obj.get(eng.nemico(lato), {}).has("sbarco") and obj.has("difendi") and st["basi"].has(str(obj["difendi"])):
+		var d: Vector2i = eng.vh(st["basi"][str(obj["difendi"])]["hex"])
+		var vis := {}
+		for bid in st["basi"]:
+			var b: Dictionary = st["basi"][bid]
+			if b["lato"] == lato or b["fuori"]:
+				continue
+			var bh: Vector2i = eng.vh(b["hex"])
+			if FTData.dist(bh, d) > 30:
+				continue
+			for h in FTData.linea(d, bh):
+				if FTData.dist(h, d) <= 22 and not vis.has(h):
+					vis[h] = true
+					out.append(h)
+	piani["corridoio"] = out
+	return out
+
+
+## Il contatto è una TF nemica nel corridoio dei convogli? (anche vista solo con la condizione 1)
+func _sospetto_convoglio(eng, c: Dictionary) -> bool:
+	if c["tipo"] != "tf" or _ha_cv(c):
+		return false
+	for h in _corridoio(eng):
+		if FTData.dist(h, c["hex"]) <= 2:
+			var i: Dictionary = c.get("info", {})
+			# con la condizione 3 si sa se ci sono trasporti: le flotte di sole navi da guerra non contano
+			if int(i.get("cond", 0)) >= 3 and int(i.get("minori", 0)) == 0:
+				return false
+			return true
+	return false
+
+
 # ================================================================ ricognizione
 
 func _ricognizioni(eng, o: Dictionary, contatti: Array) -> void:
@@ -234,6 +296,18 @@ func _ricognizioni(eng, o: Dictionary, contatti: Array) -> void:
 		return
 	# direzioni: verso il baricentro nemico (basi nemiche e contatti), a ventaglio
 	var bersagli_dir := _direzioni_ricerca(eng, contatti)
+	# pattuglia del corridoio dei convogli: punti a 5, 10, 15 e 20 esagoni dalla base difesa
+	var cor := _corridoio(eng)
+	if not cor.is_empty():
+		var sc_obj2: Dictionary = FTData.scenario(st["scen"]).get("obiettivi", {})
+		var d0: Vector2i = eng.vh(st["basi"][str(sc_obj2[lato]["difendi"])]["hex"])
+		var pat := []
+		for h in cor:
+			var dd := FTData.dist(h, d0)
+			if dd in [5, 10, 15, 20]:
+				pat.append(h)
+		bersagli_dir = pat + bersagli_dir
+		voluti += 2
 	if bersagli_dir.is_empty():
 		return
 	var usati := {}
@@ -367,6 +441,8 @@ func _attacchi(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 			val = 100
 		elif bool(c["info"].get("ha_maggiori", false)) or int(c["info"].get("maggiori", 0)) > 0:
 			val = 40
+		if nemico_sbarca and _sospetto_convoglio(eng, c):
+			val += 60
 		if obj.has("difendi") and (c.get("info", {}).get("ha_minori", false) or int(c.get("info", {}).get("minori", 0)) > 0):
 			val += 10
 			# un convoglio che punta sulla base da difendere vale più di tutto il resto
@@ -407,11 +483,19 @@ func _attacchi(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 			tipi.append(k.split("|")[0])
 			tot_arm += armati[k]
 		# serve una forza minima: non si sprecano i bombardieri a gocce
-		if tot_arm < (4 if st["navi"].has(nid) else 3):
+		if tot_arm < (4 if st["navi"].has(nid) else 5):
 			continue
 		var rag := PILOT.raggio(tipi, true)
 		var scelto = null
+		# le basi che difendono dallo sbarco tengono i bombardieri per il convoglio
+		var riserva := false
+		if nemico_sbarca and st["basi"].has(nid) and obj.has("difendi"):
+			for b0 in bers:
+				if _sospetto_convoglio(eng, b0["c"]):
+					riserva = true
 		for b in bers:
+			if riserva and not _sospetto_convoglio(eng, b["c"]) and FTData.dist(b["c"]["hex"], eng.vh(st["basi"][str(obj["difendi"])]["hex"])) > 3:
+				continue
 			var d := FTData.dist(h, b["c"]["hex"])
 			if d > rag:
 				continue
@@ -482,7 +566,7 @@ func _attacchi(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 		var miss := {"tipo": "attacco", "hex": [scelto["hex"].x, scelto["hex"].y]}
 		if scelto.has("k"):
 			miss["bersaglio"] = scelto["k"]
-			if nemico_sbarca and obj.has("difendi"):
+			if nemico_sbarca:
 				miss["priorita"] = "trasporti"
 		else:
 			miss["bersaglio_base"] = scelto["base"]
@@ -562,6 +646,14 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 						bd = d
 						best = sh
 				dest = best
+				# di giorno il convoglio non entra nel raggio degli aerei delle basi nemiche: aspetta il
+				# tramonto e corre di notte verso lo sbarco
+				var pross := FTData.percorso(h, best, true)
+				if not pross.is_empty() and h != best:
+					var avanti: Vector2i = pross[mini(pross.size() - 1, maxi(0, eng.tf_mf(tid) - 1))]
+					var buio := FTData.is_notte((int(st["ora"]) + 1) % 24 + 1) or int(st["ora"]) >= 17
+					if not buio and _sotto_aerei(eng, avanti) and not _sotto_aerei(eng, h):
+						dest = h
 				if h == best:
 					# prima di gettare l'ancora le navi da guerra si staccano: all'ancora finirebbero tutte
 					# nello schermo e non potrebbero difendere i trasporti
@@ -582,12 +674,21 @@ func _movimenti(eng, o: Dictionary, contatti: Array, obj: Dictionary) -> void:
 				dest = eng.vh(part) if part != null else h
 		elif ha_sup:
 			contegno = "attacca"
+			var notte_vicina: bool = notte or FTData.is_notte((int(st["ora"]) + 1) % 24 + 1)
+			var nemico_sbarca2: bool = not _corridoio(eng).is_empty()
 			# di notte all'attacco dei trasporti o della base nemica; di giorno lontano dagli aerei
 			var preda := Vector2i(-999, -999)
 			var pd := 9999
 			for c in contatti:
 				if c["tipo"] == "tf" and c["eta"] <= 2:
 					var d2 := FTData.dist(h, c["hex"])
+					# di notte la caccia ai convogli viene prima di tutto; contro chi deve sbarcare, di giorno
+					# non si va incontro alle flotte da guerra nemiche
+					var sosp := _sospetto_convoglio(eng, c)
+					if nemico_sbarca2 and not (sosp and notte_vicina):
+						continue
+					if sosp and notte_vicina:
+						d2 -= 6
 					if d2 < pd:
 						pd = d2
 						preda = c["hex"]
